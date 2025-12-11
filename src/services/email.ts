@@ -47,7 +47,7 @@ export class EmailService {
       }
 
       // Guardar en Firestore - esto disparará la Cloud Function
-      await addDoc(collection(db, 'emails'), emailData);
+      await addDoc(collection(db, 'mail'), emailData);
 
       console.log('✅ Email queued successfully for:', options.to);
     } catch (error) {

@@ -264,8 +264,8 @@ export default function DataEditor() {
                 setOriginalCcssConfigsData([]);
             }
 
-            // Cargar tipos de movimientos de fondo desde Firebase (solo para superadmins)
-            if (currentUser?.role === 'superadmin') {
+            // Cargar tipos de movimientos de fondo desde Firebase (para superadmins y admins)
+            if (currentUser?.role !== 'user') {
                 try {
                     const fondoTypes = await FondoMovementTypesService.getTypesFromCacheOrDB();
                     setFondoTypesData(fondoTypes);
@@ -294,7 +294,7 @@ export default function DataEditor() {
         
         // Listener para actualizaciones en tiempo real de tipos de fondo
         const handleFondoTypesUpdate = async () => {
-            if (currentUser?.role === 'superadmin') {
+            if (currentUser?.role !== 'user') {
                 try {
                     console.log('[DataEditor] Fondo types updated, reloading...');
                     const fondoTypes = await FondoMovementTypesService.getTypesFromCacheOrDB();
@@ -398,8 +398,8 @@ export default function DataEditor() {
                 console.warn('Error al guardar empresas:', err);
             }
 
-            // Guardar tipos de movimientos de fondo (solo para superadmins)
-            if (currentUser?.role === 'superadmin') {
+            // Guardar tipos de movimientos de fondo (para superadmins y admins)
+            if (currentUser?.role !== 'user') {
                 try {
                     const existingFondoTypes = await FondoMovementTypesService.getAllMovementTypes();
                     for (const ft of existingFondoTypes) { if (ft.id) await FondoMovementTypesService.deleteMovementType(ft.id); }
@@ -1359,7 +1359,7 @@ export default function DataEditor() {
                             <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             <span>Empresas ({empresasData.length})</span>
                         </button>
-                        {currentUser?.role === 'superadmin' && (
+                        {currentUser?.role !== 'user' && (
                             <button
                                 onClick={() => setActiveFile('fondoTypes')}
                                 className={`py-1.5 sm:py-2 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-1 sm:gap-2 whitespace-nowrap transition-colors ${activeFile === 'fondoTypes'
@@ -1654,7 +1654,7 @@ export default function DataEditor() {
                 </div>
             )}
 
-            {activeFile === 'fondoTypes' && currentUser?.role === 'superadmin' && (
+            {activeFile === 'fondoTypes' && currentUser?.role !== 'user' && (
                 <div className="space-y-3 sm:space-y-4 lg:space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                         <div>

@@ -46,7 +46,7 @@ const getCategoryFromType = (type?: string): 'Ingreso' | 'Gasto' | 'Egreso' | un
 		'FACTURA ELECTRONICA',
 		'GASTOS VARIOS',
 		'TRANSPORTE',
-		'SERVICIOS PROFECIONALES',
+		'SERVICIOS PROFESIONALES',
 		'MANTENIMIENTO MOBILIARIO Y EQUIPO',
 	];
 
