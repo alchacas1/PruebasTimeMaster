@@ -15,14 +15,8 @@ export function useSchedules(locationValue?: string, year?: number, month?: numb
     try {
       setLoading(true);
       setError(null);
-      const data = await SchedulesService.getAllSchedules();
-      // Filter by location, year, and month
-      const filtered = data.filter(schedule =>
-        schedule.companieValue === locationValue &&
-        schedule.year === year &&
-        schedule.month === month
-      );
-      setSchedules(filtered);
+      const data = await SchedulesService.getSchedulesByLocationYearMonth(locationValue, year, month);
+      setSchedules(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading schedules');
       console.error('Error fetching schedules:', err);

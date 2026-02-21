@@ -12,7 +12,7 @@ import {
   getDoc
 } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
-import { db, storage } from '../config/firebase';
+import { db, storage } from '@/config/firebase';
 import type { ScanResult } from '../types/firestore';
 
 export type { ScanResult } from '../types/firestore';

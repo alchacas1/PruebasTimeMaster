@@ -8,7 +8,7 @@ import HelpTooltip from '../ui/HelpTooltip';
 import ConfirmModal from '../ui/ConfirmModal';
 import { ToastProvider, useToast } from '../layout/ToastContext';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../config/firebase';
+import { storage } from '@/config/firebase';
 import QRCode from 'qrcode';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';

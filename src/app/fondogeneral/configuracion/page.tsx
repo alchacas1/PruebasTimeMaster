@@ -113,6 +113,7 @@ export default function FondoGeneralConfigurationPage() {
     const permissions = user?.permissions || getDefaultPermissions(user?.role || 'user');
     const hasFondogeneralAccess = Boolean(permissions.fondogeneral);
     const isPrivileged = user?.role === 'admin' || user?.role === 'superadmin';
+    const isSuperAdmin = user?.role === 'superadmin';
     const canAccess = isPrivileged && hasFondogeneralAccess;
     const preferredCompany = user?.ownercompanie?.trim() ?? '';
     const allowedOwnerIds = useMemo(() => {
@@ -232,18 +233,22 @@ export default function FondoGeneralConfigurationPage() {
                 const ownerSet = new Set(
                     allowedOwnerIds.map(id => id.trim()).filter(id => id.length > 0),
                 );
-                const filteredByOwner = ownerSet.size > 0
-                    ? list.filter(emp => ownerSet.has((emp.ownerId || '').trim()))
-                    : list;
-                const uniqueNames = Array.from(
+                const filteredByOwner = isSuperAdmin
+                    ? list
+                    : ownerSet.size > 0
+                        ? list.filter(emp => ownerSet.has((emp.ownerId || '').trim()))
+                        : list;
+
+                const getCompanyKey = (emp: any) => String(emp?.name || emp?.ubicacion || emp?.id || '').trim();
+                const uniqueCompanyKeys = Array.from(
                     new Set(
                         filteredByOwner
-                            .map(emp => (emp.name || '').trim())
-                            .filter(name => name.length > 0),
+                            .map(emp => getCompanyKey(emp))
+                            .filter(key => key.length > 0),
                     ),
                 );
-                uniqueNames.sort((a, b) => a.localeCompare(b, 'es'));
-                setCompanies(uniqueNames);
+                uniqueCompanyKeys.sort((a, b) => a.localeCompare(b, 'es'));
+                setCompanies(uniqueCompanyKeys);
             })
             .catch(err => {
                 console.error('Error loading empresas for configuration:', err);
@@ -261,7 +266,7 @@ export default function FondoGeneralConfigurationPage() {
         return () => {
             isActive = false;
         };
-    }, [allowedOwnerIds, canAccess]);
+    }, [allowedOwnerIds, canAccess, isSuperAdmin]);
 
     useEffect(() => {
         if (!canAccess) {

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from '../config/firebase';
+import { storage } from '@/config/firebase';
 import { compressImage, validateImageFile } from '../utils/imageUtils';
 import { UsersService } from '../services/users';
 import type { User as UserRecord } from '../types/firestore';

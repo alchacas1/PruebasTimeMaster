@@ -12,7 +12,7 @@ import {
     serverTimestamp,
     Timestamp
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 
 export interface SessionStatus {
     id: string;

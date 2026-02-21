@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Header from './Header';
 
-type ActiveTab = 'scanner' | 'calculator' | 'converter' | 'cashcounter' | 'timingcontrol' | 'controlhorario' | 'supplierorders' | 'histoscans' | 'scanhistory' | 'edit' | 'solicitud' | 'fondogeneral' | 'agregarproveedor' | 'reportes';
+type ActiveTab = 'scanner' | 'calculator' | 'converter' | 'xml' | 'cashcounter' | 'recetas' | 'agregarproducto' | 'timingcontrol' | 'controlhorario' | 'empleados' | 'calculohorasprecios' | 'supplierorders' | 'histoscans' | 'scanhistory' | 'edit' | 'solicitud' | 'fondogeneral' | 'agregarproveedor' | 'reportes';
 
 export default function HeaderWrapper() {
   const [activeTab, setActiveTab] = useState<ActiveTab | null>(null);
@@ -30,7 +30,7 @@ export default function HeaderWrapper() {
       // Check hash for hash-based navigation
       const hash = window.location.hash.replace('#', '') as ActiveTab;
       const validTabs = [
-        'scanner', 'calculator', 'converter', 'cashcounter', 'timingcontrol', 'controlhorario', 'supplierorders', 'histoscans', 'scanhistory', 'edit', 'solicitud', 'fondogeneral', 'agregarproveedor', 'reportes'
+        'scanner', 'calculator', 'converter', 'xml', 'cashcounter', 'timingcontrol', 'controlhorario', 'empleados', 'recetas', 'agregarproducto', 'calculohorasprecios', 'supplierorders', 'histoscans', 'scanhistory', 'edit', 'solicitud', 'fondogeneral', 'agregarproveedor', 'reportes'
       ];
       if (validTabs.includes(hash)) {
         // Map scanhistory hash to histoscans tab for header highlighting

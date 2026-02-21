@@ -1,6 +1,6 @@
 'use client'
 
-import { X, Settings, User, Shield, Timer, TimerOff, LogOut, Calculator } from 'lucide-react';
+import { X, Settings, User, Shield, Timer, TimerOff, LogOut, Calculator, GripVertical } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import TokenInfo from '../session/TokenInfo';
 
@@ -11,6 +11,10 @@ interface ConfigurationModalProps {
   onToggleSessionTimer: (show: boolean) => void;
   showCalculator: boolean;
   onToggleCalculator: (show: boolean) => void;
+  showSupplierWeekInMenu: boolean;
+  onToggleSupplierWeekInMenu: (show: boolean) => void;
+  enableHomeMenuSortMobile: boolean;
+  onToggleHomeMenuSortMobile: (enabled: boolean) => void;
   onLogoutClick: () => void;
 }
 
@@ -21,6 +25,10 @@ export default function ConfigurationModal({
   onToggleSessionTimer,
   showCalculator,
   onToggleCalculator,
+  showSupplierWeekInMenu,
+  onToggleSupplierWeekInMenu,
+  enableHomeMenuSortMobile,
+  onToggleHomeMenuSortMobile,
   onLogoutClick
 }: ConfigurationModalProps) {
   const { user } = useAuth();
@@ -155,6 +163,99 @@ export default function ConfigurationModal({
                     ? 'La calculadora estará disponible en todas las páginas como botón flotante'
                     : 'Activa para mostrar la calculadora flotante en toda la aplicación'
                   }
+                </div>
+              </div>
+
+              {/* Toggle para mostrar/ocultar tarjeta semanal de proveedores en Home */}
+              <div className="bg-[var(--hover-bg)] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Settings className={`w-5 h-5 ${showSupplierWeekInMenu ? 'text-green-500' : 'text-gray-500'}`} />
+                    <div>
+                      <div className="font-medium text-[var(--foreground)]">
+                        Mostrar en menu la tarjeta de Semana Proveedores
+                      </div>
+                      <div className="text-sm text-[var(--muted-foreground)]">
+                        {showSupplierWeekInMenu
+                          ? 'Tarjeta visible en el Home (si tienes permisos)'
+                          : 'Tarjeta oculta en el Home'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <label className="flex items-center cursor-pointer">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={showSupplierWeekInMenu}
+                        onChange={(e) => onToggleSupplierWeekInMenu(e.target.checked)}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`block w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${showSupplierWeekInMenu
+                          ? 'bg-green-600 shadow-lg'
+                          : 'bg-gray-300 dark:bg-gray-600'
+                          }`}
+                      />
+                      <div
+                        className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out shadow-sm ${showSupplierWeekInMenu
+                          ? 'translate-x-6'
+                          : 'translate-x-0'
+                          }`}
+                      />
+                    </div>
+                  </label>
+                </div>
+                <div className="mt-3 text-xs text-[var(--muted-foreground)]">
+                  {showSupplierWeekInMenu
+                    ? 'Se muestra la tarjeta de Semana actual (proveedores) en el menú principal'
+                    : 'Activa para mostrar la tarjeta semanal de proveedores en el Home'
+                  }
+                </div>
+              </div>
+
+              {/* Toggle para habilitar ordenar el menú del Home */}
+              <div className="bg-[var(--hover-bg)] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <GripVertical className={`w-5 h-5 ${enableHomeMenuSortMobile ? 'text-green-500' : 'text-gray-500'}`} />
+                    <div>
+                      <div className="font-medium text-[var(--foreground)]">
+                        Ordenar menú
+                      </div>
+                      <div className="text-sm text-[var(--muted-foreground)]">
+                        {enableHomeMenuSortMobile
+                          ? 'Arrastra para reordenar las tarjetas del Home'
+                          : 'Desactivado para evitar toques accidentales'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <label className="flex items-center cursor-pointer">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={enableHomeMenuSortMobile}
+                        onChange={(e) => onToggleHomeMenuSortMobile(e.target.checked)}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`block w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${enableHomeMenuSortMobile
+                          ? 'bg-green-600 shadow-lg'
+                          : 'bg-gray-300 dark:bg-gray-600'
+                          }`}
+                      />
+                      <div
+                        className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out shadow-sm ${enableHomeMenuSortMobile
+                          ? 'translate-x-6'
+                          : 'translate-x-0'
+                          }`}
+                      />
+                    </div>
+                  </label>
+                </div>
+                <div className="mt-3 text-xs text-[var(--muted-foreground)]">
+                  Aplica en todas las pantallas.
                 </div>
               </div>
             </div>

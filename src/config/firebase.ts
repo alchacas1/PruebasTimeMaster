@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import {
+  getFirestore,
+  initializeFirestore,
+  memoryLocalCache,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Configuración de Firebase con fallbacks para producción
@@ -26,7 +32,42 @@ if (!isConfigValid) {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
-export const db = getFirestore(app);
+// - In browser: enable persistent cache so offline writes survive reloads (common cause of "I saved it and tomorrow it's gone").
+// - In SSR / environments without IndexedDB: fallback to default (in-memory).
+// Optional override: set NEXT_PUBLIC_FIRESTORE_DATABASE_ID to target a named Firestore database.
+// In dev/tests we keep it empty in `.env.local` to use the default Firestore database.
+// IMPORTANT: Next loads `.env.local` with higher priority than `.env`. If `.env.local` defines
+// NEXT_PUBLIC_FIRESTORE_DATABASE_ID as an empty string, it will override the production value.
+// To make production robust, default to "restauracion" when NODE_ENV === 'production'.
+const firestoreDatabaseIdRaw = (process.env.NEXT_PUBLIC_FIRESTORE_DATABASE_ID || '').trim();
+const firestoreDatabaseId =
+  firestoreDatabaseIdRaw || (process.env.NODE_ENV === 'production' ? 'production' : '');
+
+export const db = (() => {
+  const isBrowser = typeof window !== 'undefined';
+  if (!isBrowser) {
+    return firestoreDatabaseId ? getFirestore(app, firestoreDatabaseId) : getFirestore(app);
+  }
+
+  try {
+    const settings = {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    };
+
+    return firestoreDatabaseId
+      ? initializeFirestore(app, settings, firestoreDatabaseId)
+      : initializeFirestore(app, settings);
+  } catch (err) {
+    console.warn('⚠️ Firestore persistent cache unavailable; falling back to memory cache.', err);
+    const settings = {
+      localCache: memoryLocalCache(),
+    };
+
+    return firestoreDatabaseId
+      ? initializeFirestore(app, settings, firestoreDatabaseId)
+      : initializeFirestore(app, settings);
+  }
+})();
 
 // Initialize Storage
 export const storage = getStorage(app);

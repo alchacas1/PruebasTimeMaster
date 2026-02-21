@@ -4,6 +4,8 @@ import { ThemeProvider, HeaderWrapper, Footer, PermissionsManager } from '../com
 import { ToastProvider } from '../components/ui/ToastProvider';
 import { AuthWrapper } from '../components/auth';
 import VersionCheckInitializer from '../components/VersionCheckInitializer';
+import { XmlEgresosProvider } from '../components/xml/XmlEgresosProvider';
+import BackToTop from '../components/ui/BackToTop';
 
 export const metadata = {
   title: 'Time Master',
@@ -96,14 +98,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthWrapper>
             <PermissionsManager>
               <ToastProvider>
-                <VersionCheckInitializer />
-                <HeaderWrapper />
-                <main role="main" className="flex-1 flex flex-col w-full">
-                  <div className="w-full" suppressHydrationWarning>
-                    {children}
-                  </div>
-                </main>
-                <Footer />
+                <XmlEgresosProvider>
+                  <VersionCheckInitializer />
+                  <HeaderWrapper />
+                  <main role="main" className="flex-1 flex flex-col w-full">
+                    <div className="w-full" suppressHydrationWarning>
+                      {children}
+                    </div>
+                  </main>
+                  <BackToTop />
+                  <Footer />
+                </XmlEgresosProvider>
               </ToastProvider>
             </PermissionsManager>
           </AuthWrapper>

@@ -77,6 +77,60 @@ export class SchedulesService {
   }
 
   /**
+   * Get all schedules for a specific location and month (single query).
+   * Prefer this over N-per-employee queries when loading a whole month view.
+   */
+  static async getSchedulesByLocationYearMonth(
+    locationValue: string,
+    year: number,
+    month: number
+  ): Promise<ScheduleEntry[]> {
+    return await FirestoreService.query(this.COLLECTION_NAME, [
+      { field: 'companieValue', operator: '==', value: locationValue },
+      { field: 'year', operator: '==', value: year },
+      { field: 'month', operator: '==', value: month }
+    ]);
+  }
+
+  /**
+   * Get schedules for a specific location, month and day range (quincena).
+   * Falls back to monthly query if Firestore requires a composite index.
+   */
+  static async getSchedulesByLocationYearMonthDayRange(
+    locationValue: string,
+    year: number,
+    month: number,
+    startDayInclusive: number,
+    endDayInclusive: number
+  ): Promise<ScheduleEntry[]> {
+    const startDay = Math.max(1, Math.trunc(startDayInclusive));
+    const endDay = Math.max(startDay, Math.trunc(endDayInclusive));
+
+    try {
+      return await FirestoreService.query(this.COLLECTION_NAME, [
+        { field: 'companieValue', operator: '==', value: locationValue },
+        { field: 'year', operator: '==', value: year },
+        { field: 'month', operator: '==', value: month },
+        { field: 'day', operator: '>=', value: startDay },
+        { field: 'day', operator: '<=', value: endDay }
+      ]);
+    } catch (error) {
+      console.warn(
+        '[SchedulesService] Day-range query failed; falling back to monthly query. You may need a Firestore composite index for (companieValue, year, month, day).',
+        error
+      );
+      const rows = await this.getSchedulesByLocationYearMonth(
+        locationValue,
+        year,
+        month
+      );
+      return (rows || []).filter((r) =>
+        typeof r.day === 'number' && r.day >= startDay && r.day <= endDay
+      );
+    }
+  }
+
+  /**
    * Get or create a schedule entry for a specific day
    */
   static async getOrCreateScheduleEntry(
@@ -143,7 +197,8 @@ export class SchedulesService {
     year: number,
     month: number,
     day: number,
-    shift: string
+    shift: string,
+    options?: { horasPorDia?: number }
   ): Promise<void> {
     try {
       // Find existing entry first
@@ -161,21 +216,25 @@ export class SchedulesService {
         let horasPorDia: number | undefined;
 
         if (shift === 'D' || shift === 'N') {
-          try {
-            const { EmpresasService } = await import('./empresas');
-            const empresas = await EmpresasService.getAllEmpresas();
-            // Buscar empresa por ubicacion, name o id para mayor flexibilidad
-            const empresa = empresas.find(emp => 
-              emp.ubicacion?.toLowerCase() === locationValue.toLowerCase() ||
-              emp.name?.toLowerCase() === locationValue.toLowerCase() ||
-              emp.id === locationValue
-            );
-            const employee = empresa?.empleados?.find(emp => emp.Empleado === employeeName);
-            horasPorDia = employee?.hoursPerShift ?? 8; // Default to 8 hours if not specified, use ?? to allow 0 values
-            console.log(`🔄 Adding horasPorDia for ${employeeName} (${shift}): ${horasPorDia} hours from employee config`);
-          } catch (error) {
-            console.warn('Error getting employee hoursPerShift, using default 8:', error);
-            horasPorDia = 8; // Fallback to 8 hours
+          if (typeof options?.horasPorDia === 'number') {
+            horasPorDia = options.horasPorDia;
+          } else {
+            try {
+              const { EmpresasService } = await import('./empresas');
+              const empresas = await EmpresasService.getAllEmpresas();
+              // Buscar empresa por ubicacion, name o id para mayor flexibilidad
+              const empresa = empresas.find(emp => 
+                emp.ubicacion?.toLowerCase() === locationValue.toLowerCase() ||
+                emp.name?.toLowerCase() === locationValue.toLowerCase() ||
+                emp.id === locationValue
+              );
+              const employee = empresa?.empleados?.find(emp => emp.Empleado === employeeName);
+              horasPorDia = employee?.hoursPerShift ?? 8; // Default to 8 hours if not specified, use ?? to allow 0 values
+              console.log(`🔄 Adding horasPorDia for ${employeeName} (${shift}): ${horasPorDia} hours from employee config`);
+            } catch (error) {
+              console.warn('Error getting employee hoursPerShift, using default 8:', error);
+              horasPorDia = 8; // Fallback to 8 hours
+            }
           }
         } else {
           // For shifts other than D or N (like L), don't add horasPorDia

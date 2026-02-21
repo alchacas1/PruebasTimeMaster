@@ -4,13 +4,17 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EmpresasService } from '@/services/empresas';
 import { SolicitudesService } from '@/services/solicitudes';
 import type { Empresas } from '@/types/firestore';
+import useToast from '@/hooks/useToast';
 
 export default function SolicitudForm() {
+    const { showToast } = useToast();
     const [productName, setProductName] = useState('');
     const [empresas, setEmpresas] = useState<Empresas[]>([]);
     const [empresaSelected, setEmpresaSelected] = useState('');
     // filtro para la lista de solicitudes ('' = todas)
     const [empresaFilter, setEmpresaFilter] = useState('');
+    const [searchText, setSearchText] = useState('');
+    const [showListosOnly, setShowListosOnly] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const messageTimer = useRef<number | null>(null);
@@ -40,6 +44,8 @@ export default function SolicitudForm() {
     const [loadingList, setLoadingList] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [toDelete, setToDelete] = useState<{ id: string; productName?: string } | null>(null);
+    const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+    const [bulkDeleting, setBulkDeleting] = useState(false);
 
     useEffect(() => {
         const load = async () => {
@@ -56,16 +62,11 @@ export default function SolicitudForm() {
         load();
     }, []);
 
-    const loadSolicitudes = useCallback(async (empresa?: string) => {
+    // Cargamos todas las solicitudes; el filtro de empresa es visual (client-side).
+    const loadSolicitudes = useCallback(async () => {
         setLoadingList(true);
         try {
-            let rows: any[] = [];
-            const useEmpresa = empresa !== undefined ? empresa : empresaFilter;
-            if (useEmpresa) {
-                rows = await SolicitudesService.getSolicitudesByEmpresa(useEmpresa);
-            } else {
-                rows = await SolicitudesService.getAllSolicitudes();
-            }
+            const rows = await SolicitudesService.getAllSolicitudes();
             setSolicitudes(rows || []);
         } catch (err) {
             console.error('Error loading solicitudes:', err);
@@ -73,7 +74,7 @@ export default function SolicitudForm() {
         } finally {
             setLoadingList(false);
         }
-    }, [empresaFilter]);
+    }, []);
 
     // recargar inicialmente y cuando cambie la referencia de loadSolicitudes
     useEffect(() => {
@@ -109,15 +110,73 @@ export default function SolicitudForm() {
 
     const confirmDelete = async () => {
         if (!toDelete) return;
+        const deletingId = toDelete.id;
+        const previous = solicitudes;
+        // Optimistic remove + close modal
+        setConfirmOpen(false);
+        setToDelete(null);
+        setSolicitudes(prev => prev.filter(s => s.id !== deletingId));
         try {
-            await SolicitudesService.deleteSolicitud(toDelete.id);
-            showTempMessage({ type: 'success', text: 'Solicitud eliminada correctamente.' });
-            setConfirmOpen(false);
-            setToDelete(null);
-            await loadSolicitudes();
+            await SolicitudesService.deleteSolicitud(deletingId);
+            showToast('Solicitud eliminada correctamente.', 'success');
         } catch (err) {
             console.error('Error deleting solicitud:', err);
-            setMessage({ type: 'error', text: 'Error al eliminar la solicitud.' });
+            // rollback
+            setSolicitudes(previous);
+            showToast('Error al eliminar la solicitud.', 'error');
+        }
+    };
+
+    const visibleSolicitudes = (solicitudes || []).filter((s: any) => {
+        if (empresaFilter && (s?.empresa || '') !== empresaFilter) return false;
+        if (showListosOnly && !Boolean(s?.listo)) return false;
+
+        const q = searchText.trim().toLowerCase();
+        if (!q) return true;
+
+        const product = String(s?.productName || '').toLowerCase();
+        const empresa = String(s?.empresa || '').toLowerCase();
+        return product.includes(q) || empresa.includes(q);
+    });
+
+    const listosForSelectedEmpresa = (solicitudes || []).filter((s: any) => {
+        if (!Boolean(s?.listo)) return false;
+        if (!empresaFilter) return false;
+        return (s?.empresa || '') === empresaFilter;
+    });
+
+    const confirmBulkDeleteListos = () => {
+        if (!empresaFilter) {
+            showToast('Selecciona una empresa para eliminar sus listos.', 'warning');
+            return;
+        }
+        if (listosForSelectedEmpresa.length === 0) {
+            showToast('No hay solicitudes listos para eliminar en esta empresa.', 'info');
+            return;
+        }
+        setBulkConfirmOpen(true);
+    };
+
+    const runBulkDeleteListos = async () => {
+        if (!empresaFilter) return;
+        const ids = listosForSelectedEmpresa.map((s: any) => s.id).filter(Boolean);
+        if (ids.length === 0) return;
+
+        const previous = solicitudes;
+        setBulkDeleting(true);
+        // Optimistic remove + close modal
+        setBulkConfirmOpen(false);
+        setSolicitudes(prev => prev.filter(s => !ids.includes(s.id)));
+        try {
+            await SolicitudesService.deleteSolicitudesByIds(ids);
+            showToast(`Eliminados ${ids.length} listos de ${empresaFilter}.`, 'success');
+        } catch (err) {
+            console.error('Error bulk deleting solicitudes:', err);
+            // rollback
+            setSolicitudes(previous);
+            showToast('Error al eliminar los listos.', 'error');
+        } finally {
+            setBulkDeleting(false);
         }
     };
 
@@ -126,14 +185,12 @@ export default function SolicitudForm() {
         setSolicitudes(prev => prev.map(s => s.id === id ? { ...s, listo: checked } : s));
         try {
             await SolicitudesService.setListo(id, checked);
-            showTempMessage({ type: 'success', text: checked ? 'Marcado como listo.' : 'Marcado como no listo.' });
-            // recargar lista para asegurarnos de la consistencia y respetar el filtro
-            await loadSolicitudes();
+            showToast(checked ? 'Marcado como listo.' : 'Marcado como no listo.', 'success');
         } catch (err) {
             console.error('Error updating listo flag:', err);
             // revert optimistic
             setSolicitudes(prev => prev.map(s => s.id === id ? { ...s, listo: !checked } : s));
-            setMessage({ type: 'error', text: 'Error al actualizar el estado.' });
+            showToast('Error al actualizar el estado.', 'error');
         }
     };
 
@@ -186,23 +243,57 @@ export default function SolicitudForm() {
 
             {/* Lista de solicitudes guardadas */}
             <div className="mt-6">
-                <div className="mb-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <div className="mb-3 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
                     <label className="text-sm font-medium whitespace-nowrap">Filtrar por empresa:</label>
                     <select
                         value={empresaFilter}
                         onChange={(e) => setEmpresaFilter(e.target.value)}
-                        className="w-full sm:w-auto p-2 text-sm sm:text-base border border-[var(--border)] rounded bg-[var(--input-bg)]"
+                        className="w-full sm:w-auto sm:min-w-56 p-2 text-sm sm:text-base border border-[var(--border)] rounded bg-[var(--input-bg)]"
                     >
                         <option value="">-- Todas las empresas --</option>
                         {empresas.map((emp) => (
                             <option key={emp.id || emp.name} value={emp.name}>{emp.name}</option>
                         ))}
                     </select>
+
+                    <div className="w-full sm:flex-1 sm:min-w-64">
+                        <label className="sr-only">Buscar</label>
+                        <input
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            placeholder="Buscar (producto o empresa)"
+                            className="w-full p-2 text-sm sm:text-base border border-[var(--border)] rounded bg-[var(--input-bg)]"
+                        />
+                    </div>
+
+                    <label className="inline-flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            className="form-checkbox h-4 w-4"
+                            checked={showListosOnly}
+                            onChange={(e) => setShowListosOnly(e.target.checked)}
+                        />
+                        <span className="text-sm text-[var(--muted-foreground)]">Solo listos</span>
+                    </label>
+
+                    {showListosOnly && (
+                        <button
+                            type="button"
+                            onClick={confirmBulkDeleteListos}
+                            disabled={bulkDeleting || !empresaFilter || listosForSelectedEmpresa.length === 0}
+                            className="w-full sm:w-auto sm:ml-auto px-3 py-2 bg-red-700 text-white rounded text-sm hover:bg-red-800 disabled:opacity-50"
+                            title={!empresaFilter ? 'Selecciona una empresa para borrar sus listos' : undefined}
+                        >
+                            {bulkDeleting
+                                ? 'Eliminando...'
+                                : `Eliminar listos (${listosForSelectedEmpresa.length})`}
+                        </button>
+                    )}
                 </div>
                 <h2 className="text-base sm:text-lg font-semibold mb-3">Solicitudes guardadas</h2>
                 {loadingList ? (
                     <div className="p-4 bg-[var(--card-bg)] border border-[var(--input-border)] rounded">Cargando...</div>
-                ) : solicitudes.length === 0 ? (
+                ) : visibleSolicitudes.length === 0 ? (
                     <div className="p-4 bg-[var(--card-bg)] border border-[var(--input-border)] rounded">No hay solicitudes</div>
                 ) : (
                     <>
@@ -218,7 +309,7 @@ export default function SolicitudForm() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {solicitudes.map((s) => (
+                                    {visibleSolicitudes.map((s) => (
                                         <tr key={s.id} className="border-t border-[var(--input-border)]">
                                             <td className="px-4 py-2 align-top">{s.createdAt ? new Date(s.createdAt.seconds ? s.createdAt.seconds * 1000 : s.createdAt).toLocaleString() : '-'}</td>
                                             <td className="px-4 py-2 align-top">{s.productName}</td>
@@ -241,7 +332,7 @@ export default function SolicitudForm() {
 
                         {/* Mobile card view */}
                         <div className="sm:hidden space-y-3">
-                            {solicitudes.map((s) => (
+                            {visibleSolicitudes.map((s) => (
                                 <div key={s.id} className="bg-[var(--card-bg)] border border-[var(--input-border)] rounded p-3">
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-start">
@@ -289,6 +380,34 @@ export default function SolicitudForm() {
                         <div className="flex flex-col sm:flex-row justify-end gap-2">
                             <button onClick={() => { setConfirmOpen(false); setToDelete(null); }} className="px-3 py-2 bg-gray-200 rounded w-full sm:w-auto order-2 sm:order-1">Cancelar</button>
                             <button onClick={confirmDelete} className="px-3 py-2 bg-red-600 text-white rounded w-full sm:w-auto order-1 sm:order-2">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmación de borrado masivo (listos) */}
+            {bulkConfirmOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[var(--card-bg)] border border-[var(--input-border)] rounded p-4 sm:p-6 max-w-sm w-full mx-4">
+                        <h3 className="text-base sm:text-lg font-semibold mb-2">Confirmar eliminación masiva</h3>
+                        <p className="text-sm text-[var(--muted-foreground)] mb-4">
+                            ¿Deseas eliminar {listosForSelectedEmpresa.length} solicitudes marcadas como listo de la empresa &quot;{empresaFilter}&quot;?
+                        </p>
+                        <div className="flex flex-col sm:flex-row justify-end gap-2">
+                            <button
+                                onClick={() => setBulkConfirmOpen(false)}
+                                disabled={bulkDeleting}
+                                className="px-3 py-2 bg-gray-200 rounded w-full sm:w-auto order-2 sm:order-1 disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={runBulkDeleteListos}
+                                disabled={bulkDeleting}
+                                className="px-3 py-2 bg-red-700 text-white rounded w-full sm:w-auto order-1 sm:order-2 hover:bg-red-800 disabled:opacity-50"
+                            >
+                                {bulkDeleting ? 'Eliminando...' : 'Eliminar'}
+                            </button>
                         </div>
                     </div>
                 </div>

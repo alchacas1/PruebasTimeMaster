@@ -1,0 +1,38 @@
+[
+  {
+    "id": "nombreReceta",
+    "nombre": "nombreReceta",
+    "descripcion": "recetica",
+    "productos": [
+      { "productId": "nombreProducto", "gramos": 200 },
+      { "productId": "nombreProducto2", "gramos": 150 }
+    ],
+    "margen": 0.35,
+    "createdAt": "2026-02-18T01:05:38.688Z",
+    "updateAt": "2026-02-20T01:05:55.862Z"
+  },
+  {
+    "id": "nombreReceta2",
+    "nombre": "nombreReceta2",
+    "descripcion": "recetica2",
+    "productos": [
+      { "productId": "nombreProducto", "gramos": 200 },
+      { "productId": "nombreProducto2", "gramos": 150 }
+    ],
+    "margen": 0.35,
+    "createdAt": "2026-02-18T01:05:38.688Z",
+    "updateAt": "2026-02-20T01:05:55.862Z"
+  },
+  {
+    "id": "nombreReceta3",
+    "nombre": "nombreReceta3",
+    "descripcion": "recetica3",
+    "productos": [
+      { "productId": "nombreProducto", "gramos": 200 },
+      { "productId": "nombreProducto2", "gramos": 150 }
+    ],
+    "margen": 0.35,
+    "createdAt": "2026-02-18T01:05:38.688Z",
+    "updateAt": "2026-02-20T01:05:55.862Z"
+  }
+]

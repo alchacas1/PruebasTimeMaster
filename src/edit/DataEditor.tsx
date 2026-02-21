@@ -737,7 +737,7 @@ export default function DataEditor() {
                 const updated = [...usersData];
                 const permissionKeys: (keyof UserPermissions)[] = [
                     'scanner', 'calculator', 'converter', 'cashcounter',
-                    'timingcontrol', 'controlhorario', 'supplierorders', 'mantenimiento', 'solicitud', 'scanhistory'
+                    'timingcontrol', 'controlhorario', 'calculohorasprecios', 'supplierorders', 'mantenimiento', 'solicitud', 'scanhistory'
                 ];
 
                 if (!updated[userIndex].permissions) {
@@ -787,6 +787,7 @@ export default function DataEditor() {
             cashcounter: 'Contador Efectivo',
             timingcontrol: 'Control Tiempos',
             controlhorario: 'Control Horario',
+            calculohorasprecios: 'Calculo Horas Precios',
             supplierorders: 'Órdenes Proveedor',
             mantenimiento: 'Mantenimiento',
             solicitud: 'Solicitud',
@@ -804,6 +805,7 @@ export default function DataEditor() {
             cashcounter: 'Contar billetes y monedas',
             timingcontrol: 'Registro de venta de tiempos',
             controlhorario: 'Registro de horarios de trabajo',
+            calculohorasprecios: 'Cálculo de horas y precios (planilla)',
             supplierorders: 'Gestión de órdenes de proveedores',
             mantenimiento: 'Acceso al panel de administración',
             solicitud: 'Permite gestionar solicitudes dentro del módulo de mantenimiento',
@@ -1397,7 +1399,26 @@ export default function DataEditor() {
                             </p>
                         </div>
                         <button
-                            onClick={() => setEmpresasData(prev => [...prev, { ownerId: currentUser && currentUser.eliminate === false ? currentUser.id : '', name: '', ubicacion: '', empleados: [{ Empleado: '', hoursPerShift: 8, extraAmount: 0, ccssType: 'TC' }] }])}
+                            onClick={() =>
+                                setEmpresasData(prev => [
+                                    ...prev,
+                                    {
+                                        ownerId: currentUser && currentUser.eliminate === false ? currentUser.id : '',
+                                        name: '',
+                                        ubicacion: '',
+                                        empleados: [
+                                            {
+                                                Empleado: '',
+                                                hoursPerShift: 8,
+                                                extraAmount: 0,
+                                                ccssType: 'TC',
+                                                calculoprecios: false,
+                                                amboshorarios: false
+                                            }
+                                        ]
+                                    }
+                                ])
+                            }
                             className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-xs sm:text-sm w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap"
                         >
                             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -1445,7 +1466,14 @@ export default function DataEditor() {
                                         onClick={() => {
                                             const copy = [...empresasData];
                                             if (!copy[idx].empleados) copy[idx].empleados = [];
-                                            copy[idx].empleados.push({ Empleado: '', 'Horas por turno': 8, 'Monto extra': 0, 'ccssType ': '' });
+                                            copy[idx].empleados.push({
+                                                Empleado: '',
+                                                hoursPerShift: 8,
+                                                extraAmount: 0,
+                                                ccssType: 'TC',
+                                                calculoprecios: false,
+                                                amboshorarios: false
+                                            });
                                             setEmpresasData(copy);
                                         }}
                                         className="text-xs sm:text-sm bg-green-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-md hover:bg-green-700 transition-colors w-full sm:w-auto flex items-center justify-center gap-1.5 whitespace-nowrap"
@@ -1521,6 +1549,40 @@ export default function DataEditor() {
                                                         <option value="TC">Tiempo Completo</option>
                                                         <option value="MT">Medio Tiempo</option>
                                                     </select>
+                                                </div>
+
+                                                <div className="sm:col-span-2">
+                                                    <label className="block text-[10px] sm:text-xs font-medium mb-1">Horarios</label>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                        <label className="flex items-center gap-2 text-xs sm:text-sm">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={Boolean(emp.amboshorarios)}
+                                                                onChange={(ev) => {
+                                                                    const copy = [...empresasData];
+                                                                    copy[idx].empleados[eIdx].amboshorarios = ev.target.checked;
+                                                                    setEmpresasData(copy);
+                                                                }}
+                                                            />
+                                                            Ambos horarios
+                                                        </label>
+
+                                                        <label className="flex items-center gap-2 text-xs sm:text-sm">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={Boolean(emp.calculoprecios)}
+                                                                onChange={(ev) => {
+                                                                    const copy = [...empresasData];
+                                                                    copy[idx].empleados[eIdx].calculoprecios = ev.target.checked;
+                                                                    setEmpresasData(copy);
+                                                                }}
+                                                            />
+                                                            Cálculo precios
+                                                        </label>
+                                                    </div>
+                                                    <p className="text-[10px] sm:text-xs text-[var(--muted-foreground)] mt-1">
+                                                        Si “Ambos horarios” está activo, tiene prioridad.
+                                                    </p>
                                                 </div>
                                                 <div className="sm:col-span-2 flex justify-end mt-2 pt-2 border-t border-[var(--input-border)]">
                                                     <button

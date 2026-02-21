@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import versionData from '../data/version.json';
+
+export type ReleaseNote = {
+  date: string;
+  title: string;
+  description: string;
+};
 
 // Función para comparar versiones semánticas
 function compareVersions(v1: string, v2: string): number {
@@ -26,6 +32,10 @@ export function useVersion() {
   const [loading, setLoading] = useState(true);
   const [isLocalNewer, setIsLocalNewer] = useState(false);
   const [dbVersion, setDbVersion] = useState<string | null>(null);
+
+  const releaseNotes =
+    (versionData as unknown as { releaseNotes?: ReleaseNote[] }).releaseNotes ??
+    [];
 
   useEffect(() => {
     // Obtener la versión una sola vez al cargar, sin suscripción en tiempo real
@@ -68,5 +78,5 @@ export function useVersion() {
     fetchVersion();
   }, []); // Solo se ejecuta una vez al montar el componente
 
-  return { version, loading, isLocalNewer, dbVersion };
+  return { version, loading, isLocalNewer, dbVersion, releaseNotes };
 }

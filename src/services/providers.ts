@@ -1,5 +1,5 @@
 import { doc, getDoc, runTransaction } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import type { ProviderEntry } from '../types/firestore';
 
 interface ProvidersDocument {
@@ -7,6 +7,64 @@ interface ProvidersDocument {
 	nextCode: number;
 	providers: ProviderEntry[];
 }
+
+type ProviderVisitDay = 'D' | 'L' | 'M' | 'MI' | 'J' | 'V' | 'S';
+type ProviderVisitFrequency = 'SEMANAL' | 'QUINCENAL' | 'MENSUAL' | '22 DIAS';
+
+const VISIT_DAYS: ProviderVisitDay[] = ['D', 'L', 'M', 'MI', 'J', 'V', 'S'];
+const VISIT_FREQUENCIES: ProviderVisitFrequency[] = ['SEMANAL', 'QUINCENAL', 'MENSUAL', '22 DIAS'];
+
+const normalizeVisitDays = (raw: unknown): ProviderVisitDay[] => {
+	if (!Array.isArray(raw)) return [];
+	const out: ProviderVisitDay[] = [];
+	for (const item of raw) {
+		if (typeof item !== 'string') continue;
+		const normalized = item.trim().toUpperCase();
+		if (VISIT_DAYS.includes(normalized as ProviderVisitDay)) {
+			out.push(normalized as ProviderVisitDay);
+		}
+	}
+	// unique while preserving order
+	return out.filter((d, idx) => out.indexOf(d) === idx);
+};
+
+const normalizeVisitFrequency = (raw: unknown): ProviderVisitFrequency | undefined => {
+	if (typeof raw !== 'string') return undefined;
+	const normalized = raw.trim().toUpperCase();
+	return VISIT_FREQUENCIES.includes(normalized as ProviderVisitFrequency)
+		? (normalized as ProviderVisitFrequency)
+		: undefined;
+};
+
+const normalizeVisitConfig = (raw: unknown): ProviderEntry['visit'] | undefined => {
+	if (!raw || typeof raw !== 'object') return undefined;
+	const data = raw as Record<string, unknown>;
+	const createOrderDays = normalizeVisitDays(data.createOrderDays);
+	const receiveOrderDays = normalizeVisitDays(data.receiveOrderDays);
+	const frequency = normalizeVisitFrequency(data.frequency);
+	if (!frequency) return undefined;
+	if (createOrderDays.length === 0 && receiveOrderDays.length === 0) return undefined;
+
+	const startDateKeyRaw = data.startDateKey ?? (data as any).startdatekey ?? (data as any).startDate;
+	let startDateKey: number | undefined;
+	if (typeof startDateKeyRaw === 'number' && Number.isFinite(startDateKeyRaw) && startDateKeyRaw > 0) {
+		startDateKey = startDateKeyRaw;
+	} else if (typeof startDateKeyRaw === 'string') {
+		const trimmed = startDateKeyRaw.trim();
+		const parsed = Number.parseInt(trimmed, 10);
+		if (Number.isFinite(parsed) && parsed > 0) startDateKey = parsed;
+	}
+
+	// For SEMANAL we don't need an anchor; omit to keep storage clean.
+	if (frequency === 'SEMANAL') startDateKey = undefined;
+	// For non-weekly frequencies, keep startDateKey optional for backward compatibility.
+	return {
+		createOrderDays,
+		receiveOrderDays,
+		frequency,
+		startDateKey,
+	};
+};
 
 /**
  * Determina la categoría automáticamente basándose en el tipo de movimiento
@@ -119,6 +177,7 @@ const normalizeProviderEntry = (raw: unknown, fallbackCompany: string): Provider
 	const createdAt = typeof data.createdAt === 'string' ? data.createdAt : undefined;
 	const updatedAt = typeof data.updatedAt === 'string' ? data.updatedAt : undefined;
 	const correonotifi = typeof data.correonotifi === 'string' ? data.correonotifi.trim() : undefined;
+	const visit = normalizeVisitConfig(data.visit);
 
 	return {
 		name,
@@ -128,7 +187,8 @@ const normalizeProviderEntry = (raw: unknown, fallbackCompany: string): Provider
 		category: categoryCandidate,
 		createdAt,
 		updatedAt,
-		correonotifi
+		correonotifi,
+		visit
 	};
 };
 
@@ -184,11 +244,31 @@ const normalizeProvidersDocument = (raw: unknown, company: string): ProvidersDoc
 
 export class ProvidersService {
 	private static readonly COLLECTION_NAME = 'proveedores';
+	private static readonly CACHE_TTL_MS = 15_000;
+	private static readonly providersCache = new Map<string, { expiresAt: number; providers: ProviderEntry[] }>();
+
+	private static cloneProviders(providers: ProviderEntry[]): ProviderEntry[] {
+		return (providers || []).map((p) => ({
+			...p,
+			visit: p.visit
+				? {
+					...p.visit,
+					createOrderDays: Array.isArray(p.visit.createOrderDays) ? [...p.visit.createOrderDays] : [],
+					receiveOrderDays: Array.isArray(p.visit.receiveOrderDays) ? [...p.visit.receiveOrderDays] : [],
+				}
+				: undefined,
+		}));
+	}
 
 	static async getProviders(company: string): Promise<ProviderEntry[]> {
 		const trimmedCompany = (company || '').trim();
 		if (!trimmedCompany) {
 			return [];
+		}
+
+		const cached = this.providersCache.get(trimmedCompany);
+		if (cached && cached.expiresAt > Date.now()) {
+			return this.cloneProviders(cached.providers);
 		}
 
 		const docRef = doc(db, this.COLLECTION_NAME, trimmedCompany);
@@ -199,10 +279,20 @@ export class ProvidersService {
 		}
 
 		const normalized = normalizeProvidersDocument(snapshot.data(), trimmedCompany);
-		return normalized.providers;
+		this.providersCache.set(trimmedCompany, {
+			expiresAt: Date.now() + this.CACHE_TTL_MS,
+			providers: normalized.providers,
+		});
+		return this.cloneProviders(normalized.providers);
 	}
 
-	static async addProvider(company: string, providerName: string, providerType?: string, correonotifi?: string): Promise<ProviderEntry> {
+	static async addProvider(
+		company: string,
+		providerName: string,
+		providerType?: string,
+		correonotifi?: string,
+		visit?: ProviderEntry['visit']
+	): Promise<ProviderEntry> {
 		const trimmedCompany = (company || '').trim();
 		if (!trimmedCompany) {
 			throw new Error('No se pudo determinar la empresa del usuario.');
@@ -241,6 +331,14 @@ export class ProvidersService {
 			const category = getCategoryFromType(normalizedType);
 			const now = new Date().toISOString();
 			const trimmedCorreo = typeof correonotifi === 'string' ? correonotifi.trim() : undefined;
+			const sanitizedVisit = visit ? normalizeVisitConfig(visit as unknown) : undefined;
+			const shouldPersistVisit = Boolean(
+				normalizedType === 'COMPRA INVENTARIO' &&
+				sanitizedVisit &&
+				sanitizedVisit.frequency &&
+				sanitizedVisit.createOrderDays.length > 0 &&
+				sanitizedVisit.receiveOrderDays.length > 0
+			);
 			const createdProvider: ProviderEntry = {
 				code: String(nextNumericCode).padStart(4, '0'),
 				name: normalizedName,
@@ -249,7 +347,8 @@ export class ProvidersService {
 				category,
 				createdAt: now,
 				updatedAt: now,
-				correonotifi: trimmedCorreo && trimmedCorreo.length > 0 ? trimmedCorreo : undefined
+				correonotifi: trimmedCorreo && trimmedCorreo.length > 0 ? trimmedCorreo : undefined,
+				visit: shouldPersistVisit ? sanitizedVisit : undefined
 			};
 
 			const updatedDocument: ProvidersDocument = {
@@ -274,6 +373,16 @@ export class ProvidersService {
 					if (typeof p.createdAt === 'string' && p.createdAt.length > 0) out.createdAt = p.createdAt;
 					if (typeof p.updatedAt === 'string' && p.updatedAt.length > 0) out.updatedAt = p.updatedAt;
 					if (typeof p.correonotifi === 'string' && p.correonotifi.length > 0) out.correonotifi = p.correonotifi;
+					if (p.visit) {
+						out.visit = {
+							createOrderDays: p.visit.createOrderDays,
+							receiveOrderDays: p.visit.receiveOrderDays,
+							frequency: p.visit.frequency,
+						};
+						if (typeof p.visit.startDateKey === 'number' && Number.isFinite(p.visit.startDateKey)) {
+							(out.visit as any).startDateKey = p.visit.startDateKey;
+						}
+					}
 					return out;
 				}),
 			};
@@ -282,6 +391,7 @@ export class ProvidersService {
 			return createdProvider;
 		});
 
+		this.providersCache.delete(trimmedCompany);
 		return newProvider;
 	}
 
@@ -344,10 +454,18 @@ export class ProvidersService {
 			return providerToRemove;
 		});
 
+		this.providersCache.delete(trimmedCompany);
 		return removedProvider;
 	}
 
-	static async updateProvider(company: string, providerCode: string, providerName: string, providerType?: string, correonotifi?: string): Promise<ProviderEntry> {
+	static async updateProvider(
+		company: string,
+		providerCode: string,
+		providerName: string,
+		providerType?: string,
+		correonotifi?: string,
+		visit?: ProviderEntry['visit']
+	): Promise<ProviderEntry> {
 		const trimmedCompany = (company || '').trim();
 		if (!trimmedCompany) {
 			throw new Error('No se pudo determinar la empresa del usuario.');
@@ -390,13 +508,22 @@ export class ProvidersService {
 
 			const category = getCategoryFromType(normalizedType);
 			const trimmedCorreo = typeof correonotifi === 'string' ? correonotifi.trim() : undefined;
+			const sanitizedVisit = visit ? normalizeVisitConfig(visit as unknown) : undefined;
+			const shouldPersistVisit = Boolean(
+				normalizedType === 'COMPRA INVENTARIO' &&
+				sanitizedVisit &&
+				sanitizedVisit.frequency &&
+				sanitizedVisit.createOrderDays.length > 0 &&
+				sanitizedVisit.receiveOrderDays.length > 0
+			);
 			const updatedProvider: ProviderEntry = {
 				...document.providers[targetIndex],
 				name: normalizedName,
 				type: normalizedType,
 				category,
 				updatedAt: new Date().toISOString(),
-				correonotifi: trimmedCorreo && trimmedCorreo.length > 0 ? trimmedCorreo : undefined
+				correonotifi: trimmedCorreo && trimmedCorreo.length > 0 ? trimmedCorreo : undefined,
+				visit: shouldPersistVisit ? sanitizedVisit : undefined
 			}; const updatedProviders = [...document.providers];
 			updatedProviders[targetIndex] = updatedProvider;
 
@@ -420,6 +547,16 @@ export class ProvidersService {
 					if (typeof p.createdAt === 'string' && p.createdAt.length > 0) out.createdAt = p.createdAt;
 					if (typeof p.updatedAt === 'string' && p.updatedAt.length > 0) out.updatedAt = p.updatedAt;
 					if (typeof p.correonotifi === 'string' && p.correonotifi.length > 0) out.correonotifi = p.correonotifi;
+					if (p.visit) {
+						out.visit = {
+							createOrderDays: p.visit.createOrderDays,
+							receiveOrderDays: p.visit.receiveOrderDays,
+							frequency: p.visit.frequency,
+						};
+						if (typeof p.visit.startDateKey === 'number' && Number.isFinite(p.visit.startDateKey)) {
+							(out.visit as any).startDateKey = p.visit.startDateKey;
+						}
+					}
 					return out;
 				}),
 			};
@@ -428,6 +565,7 @@ export class ProvidersService {
 			return updatedProvider;
 		});
 
+		this.providersCache.delete(trimmedCompany);
 		return updated;
 	}
 

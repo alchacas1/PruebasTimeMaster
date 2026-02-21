@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Copy, Trash2, Edit3, ArrowLeftCircle, Download, Image as ImageIcon, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import type { ScanHistoryProps as BaseScanHistoryProps, ScanHistoryEntry } from '../../types/barcode';
-import { storage } from '../../config/firebase';
+import { storage } from '@/config/firebase';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 
 interface ScanHistoryProps extends BaseScanHistoryProps {

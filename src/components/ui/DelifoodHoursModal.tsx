@@ -131,7 +131,7 @@ export default function DelifoodHoursModal({
               Puedes usar decimales (ej: 8.5 para 8 horas y 30 minutos)
             </p>
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
-              💡 Poner 0 horas eliminará este registro
+              Colocar 0 horas eliminará este registro
             </p>
           </div>
 

@@ -1,27 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Lock, User, Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react';
-import type { User as UserType } from '@/types/firestore';
-import { PasswordRecoveryModal } from './PasswordRecoveryModal';
-import Image from 'next/image';
-import { useVersion } from '@/hooks/useVersion';
-
+import React, { useState, useEffect } from "react";
+import { Lock, User, Eye, EyeOff, Check, X, AlertCircle } from "lucide-react";
+import type { User as UserType } from "@/types/firestore";
+import { PasswordRecoveryModal } from "./PasswordRecoveryModal";
+import Image from "next/image";
+import { useVersion } from "@/hooks/useVersion";
 
 interface LoginModalProps {
   isOpen: boolean;
-  onLoginSuccess: (user: UserType, keepActive?: boolean, useTokens?: boolean) => void; // Agregar parámetro para tokens
+  onLoginSuccess: (
+    user: UserType,
+    keepActive?: boolean,
+    useTokens?: boolean
+  ) => void; // Agregar parámetro para tokens
   onClose: () => void;
   title: string;
   canClose?: boolean; // Nueva prop para controlar si se puede cerrar
 }
 
-export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, canClose = true }: LoginModalProps) {
+export default function LoginModal({
+  isOpen,
+  onLoginSuccess,
+  onClose,
+  title,
+  canClose = true,
+}: LoginModalProps) {
   const { version, isLocalNewer, dbVersion } = useVersion();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepSessionActive, setKeepSessionActive] = useState(false);
   const [useTokenAuth, setUseTokenAuth] = useState(false); // Nueva opción para tokens
@@ -75,7 +84,7 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
 
   // Caps lock detection
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.getModifierState && e.getModifierState('CapsLock')) {
+    if (e.getModifierState && e.getModifierState("CapsLock")) {
       setCapsLockOn(true);
     } else {
       setCapsLockOn(false);
@@ -85,32 +94,32 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
   // Format date and time
   const formatDateTime = () => {
     const options: Intl.DateTimeFormatOptions = {
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
     };
-    return currentTime.toLocaleDateString('es-ES', options);
+    return currentTime.toLocaleDateString("es-ES", options);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       // Use server-side login endpoint that validates credentials and returns user
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
       const respJson = await response.json();
       const isSuperAdmin = respJson.isSuperAdmin; // Extraer la bandera
       if (!response.ok || !respJson.ok) {
         const newAttempts = failedAttempts + 1;
         setFailedAttempts(newAttempts);
-        setError(respJson?.error || 'Credenciales incorrectas');
+        setError(respJson?.error || "Credenciales incorrectas");
 
         // Trigger shake animation
         setShakePassword(true);
@@ -129,17 +138,17 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
       if (safeUser) {
         onLoginSuccess(safeUser as UserType, keepSessionActive, useTokenAuth);
         // Limpiar formulario
-        setUsername('');
-        setPassword('');
+        setUsername("");
+        setPassword("");
         setKeepSessionActive(false);
         setUseTokenAuth(false);
         setFailedAttempts(0); // Resetear contador en login exitoso
       } else {
-        setError('Credenciales invalidas');
+        setError("Credenciales invalidas");
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      setError('Error al conectar con el servidor');
+      console.error("Error during login:", error);
+      setError("Error al conectar con el servidor");
     } finally {
       setLoading(false);
     }
@@ -149,22 +158,15 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
 
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-center min-h-screen transition-all duration-700 ease-out"
-      style={{
-        backdropFilter: 'blur(4px)',
-        backgroundColor: 'rgba(0, 0, 0, 0.45)',
-        opacity: mounted ? 1 : 0
-      }}
+      className={`w-full h-full flex flex-col items-center justify-center px-4 pt-6 pb-8 sm:pt-10 transition-opacity duration-700 ease-out ${
+        mounted ? "opacity-100" : "opacity-0"
+      }`}
     >
-
       {/* Date/Time Card */}
       <div
-        className="mb-4 bg-[var(--card-bg)] rounded-lg shadow-lg px-4 py-2 border border-gray-200/20 transition-all duration-500"
-        style={{
-          transform: mounted ? 'translateY(0)' : 'translateY(-10px)',
-          opacity: mounted ? 1 : 0,
-          transitionDelay: '100ms'
-        }}
+        className={`mb-4 bg-[var(--card-bg)] rounded-lg shadow-lg px-4 py-2 border border-gray-200/20 transition-all duration-500 delay-100 ${
+          mounted ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+        }`}
       >
         <p className="text-sm text-[var(--muted-foreground)] text-center">
           Hoy: {formatDateTime()}
@@ -174,17 +176,20 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
       {/* Login modal siempre por encima, z-20 */}
       <div className="w-full flex flex-col items-center justify-center z-20 relative">
         <div
-          className="bg-[var(--card-bg)] rounded-lg p-4 sm:p-6 w-full max-w-xs sm:max-w-md mx-2 sm:mx-4 transition-all duration-700 ease-out"
-          style={{
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2)',
-            transform: mounted ? 'translateY(0)' : 'translateY(-10px)',
-            opacity: mounted ? 1 : 0,
-            transitionDelay: '200ms'
-          }}
+          className={`bg-[var(--card-bg)] rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-xs sm:max-w-md mx-2 sm:mx-4 transition-all duration-700 ease-out delay-200 ${
+            mounted ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+          }`}
         >
           <div className="text-center mb-6">
             <div className="relative w-[120px] h-[120px] mx-auto mb-4">
-              <Image src="/Logos/LogoBlanco.png" alt="Logo" fill sizes="120px" loading="eager" className="object-contain" />
+              <Image
+                src="/Logos/LogoBlanco.png"
+                alt="Logo"
+                fill
+                sizes="120px"
+                loading="eager"
+                className="object-contain"
+              />
             </div>
             <h2 className="text-2xl font-semibold mb-2">Bienvenido</h2>
           </div>
@@ -223,12 +228,13 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className={`w-full pl-10 pr-20 py-2 border border-gray-300 rounded-lg bg-[var(--input-bg)] text-[var(--foreground)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] ${shakePassword ? 'animate-[shake_0.5s_ease-in-out]' : ''
-                    }`}
+                  className={`w-full pl-10 pr-20 py-2 border border-gray-300 rounded-lg bg-[var(--input-bg)] text-[var(--foreground)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] ${
+                    shakePassword ? "animate-[shake_0.5s_ease-in-out]" : ""
+                  }`}
                   placeholder="Ingresa tu contraseña"
                   required
                   disabled={loading}
@@ -247,7 +253,9 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-[0_0_8px_rgba(59,130,246,0.3)] rounded-full p-1"
                   disabled={loading}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -259,7 +267,6 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
                 </div>
               )}
             </div>
-
 
             {/* Toggle para autenticación con tokens */}
             <div className="flex items-center justify-between">
@@ -277,14 +284,18 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
                     className="sr-only"
                     disabled={loading}
                   />
-                  <div className={`block w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${useTokenAuth
-                    ? 'bg-green-600 shadow-lg'
-                    : 'bg-gray-300 dark:bg-gray-600'
-                    } ${loading ? 'opacity-50' : 'group-hover:shadow-md'}`}>
-                  </div>
-                  <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out shadow-sm ${useTokenAuth ? 'translate-x-5' : 'translate-x-0'
-                    }`}>
-                  </div>
+                  <div
+                    className={`block w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${
+                      useTokenAuth
+                        ? "bg-green-600 shadow-lg"
+                        : "bg-gray-300 dark:bg-gray-600"
+                    } ${loading ? "opacity-50" : "group-hover:shadow-md"}`}
+                  ></div>
+                  <div
+                    className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out shadow-sm ${
+                      useTokenAuth ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  ></div>
                 </div>
                 <div className="ml-3">
                   <span className="text-sm font-medium text-[var(--foreground)]">
@@ -301,7 +312,7 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
                 {error}
               </div>
             )}
-            <div className={`flex gap-3 ${canClose ? '' : 'justify-center'}`}>
+            <div className={`flex gap-3 ${canClose ? "" : "justify-center"}`}>
               {canClose && (
                 <button
                   type="button"
@@ -314,10 +325,12 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
               )}
               <button
                 type="submit"
-                className={`py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 ${canClose ? 'flex-1' : 'w-full'}`}
+                className={`py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 ${
+                  canClose ? "flex-1" : "w-full"
+                }`}
                 disabled={loading}
               >
-                {loading ? 'Verificando...' : 'Iniciar Sesión'}
+                {loading ? "Verificando..." : "Iniciar Sesión"}
               </button>
             </div>
           </form>
@@ -331,8 +344,16 @@ export default function LoginModal({ isOpen, onLoginSuccess, onClose, title, can
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30"
                   title={`Nueva versión desplegada.`}
                 >
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   NUEVA
                 </span>

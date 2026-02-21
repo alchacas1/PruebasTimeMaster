@@ -3,13 +3,31 @@ import { CcssConfig, companies } from '../types/firestore';
 
 export class CcssConfigService {
   private static readonly COLLECTION_NAME = 'ccss-config';
+  private static readonly CACHE_TTL_MS = 5 * 60 * 1000;
+  private static readonly cacheByOwnerId = new Map<
+    string,
+    { fetchedAt: number; configs: CcssConfig[] }
+  >();
 
   /**
    * Get CCSS configuration by owner
    */
   static async getCcssConfig(ownerId: string, ownerCompanie?: string): Promise<CcssConfig | null> {
     try {
-      const configs = await FirestoreService.getAll(this.COLLECTION_NAME);
+      if (!ownerId) return null;
+
+      const cached = this.cacheByOwnerId.get(ownerId);
+      const now = Date.now();
+      let configs: CcssConfig[];
+
+      if (cached && now - cached.fetchedAt < this.CACHE_TTL_MS) {
+        configs = cached.configs;
+      } else {
+        configs = await FirestoreService.query(this.COLLECTION_NAME, [
+          { field: 'ownerId', operator: '==', value: ownerId }
+        ]);
+        this.cacheByOwnerId.set(ownerId, { fetchedAt: now, configs });
+      }
 
       // Find config by ownerId and optionally by ownerCompanie
       const config = configs.find((config: CcssConfig) => {
@@ -47,6 +65,9 @@ export class CcssConfigService {
         // Create new config document
         await FirestoreService.add(this.COLLECTION_NAME, configWithTimestamp);
       }
+
+      // Invalidate cache for this owner
+      this.cacheByOwnerId.delete(config.ownerId);
     } catch (error) {
       console.error('Error updating CCSS config:', error);
       throw error;
@@ -58,8 +79,19 @@ export class CcssConfigService {
    */
   static async getAllCcssConfigsByOwner(ownerId: string): Promise<CcssConfig[]> {
     try {
-      const configs = await FirestoreService.getAll(this.COLLECTION_NAME);
-      return configs.filter((config: CcssConfig) => config.ownerId === ownerId);
+      if (!ownerId) return [];
+
+      const cached = this.cacheByOwnerId.get(ownerId);
+      const now = Date.now();
+      if (cached && now - cached.fetchedAt < this.CACHE_TTL_MS) {
+        return cached.configs;
+      }
+
+      const configs = await FirestoreService.query(this.COLLECTION_NAME, [
+        { field: 'ownerId', operator: '==', value: ownerId }
+      ]);
+      this.cacheByOwnerId.set(ownerId, { fetchedAt: now, configs });
+      return configs;
     } catch (error) {
       console.error('Error getting CCSS configs by owner:', error);
       return [];

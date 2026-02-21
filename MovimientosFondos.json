@@ -1,0 +1,802 @@
+[
+  {
+    "id": "movements_ALCHACAS",
+    "company": "ALCHACAS",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 35000
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 100
+        }
+      ],
+      "updatedAt": "2026-02-13T02:26:48.471Z",
+      "lockedUntil": "2026-02-01T05:17:50.464Z"
+    }
+  },
+  {
+    "id": "movements_DELIFOOD",
+    "company": "DELIFOOD",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": -70000
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        }
+      ],
+      "updatedAt": "2025-12-14T01:03:11.623Z",
+      "lockedUntil": "2025-12-09T04:37:02.168Z"
+    }
+  },
+  {
+    "id": "movements_DELIKOR COOPABUENA",
+    "company": "DELIKOR COOPABUENA",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": false,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": false,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": false,
+          "initialBalance": 0,
+          "currentBalance": 0
+        }
+      ],
+      "updatedAt": "2025-12-14T01:05:30.191Z",
+      "lockedUntil": "2025-12-09T04:58:20.903Z"
+    }
+  },
+  {
+    "id": "movements_DELIKOR PALMARES",
+    "company": "DELIKOR PALMARES",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": -5000
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        }
+      ],
+      "updatedAt": "2026-02-12T23:36:16.175Z"
+    }
+  },
+  {
+    "id": "movements_DELIKOR SAN VITO",
+    "company": "DELIKOR SAN VITO",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": -3271681
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        }
+      ],
+      "updatedAt": "2026-02-03T20:53:24.127Z",
+      "lockedUntil": "2025-12-09T05:17:07.624Z"
+    }
+  },
+  {
+    "id": "movements_DELIKOR SINAI",
+    "company": "DELIKOR SINAI",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": -10000
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": -500000
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        }
+      ],
+      "updatedAt": "2025-12-09T21:18:12.979Z",
+      "lockedUntil": "2025-12-09T06:00:59.205Z"
+    }
+  },
+  {
+    "id": "movements_PALMARES",
+    "company": "PALMARES",
+    "configuration": {
+      "accounts": [
+        {
+          "id": "FondoGeneral",
+          "label": "Fondo General",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BCR",
+          "label": "BCR",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BN",
+          "label": "BN",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        },
+        {
+          "id": "BAC",
+          "label": "BAC",
+          "supportedCurrencies": [
+            "CRC",
+            "USD"
+          ]
+        }
+      ],
+      "currencies": [
+        {
+          "code": "CRC",
+          "enabled": true
+        },
+        {
+          "code": "USD",
+          "enabled": true
+        }
+      ]
+    },
+    "operations": {
+      "movements": []
+    },
+    "state": {
+      "balancesByAccount": [
+        {
+          "accountId": "BCR",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BCR",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BN",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "BAC",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 0,
+          "currentBalance": 0
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "CRC",
+          "enabled": true,
+          "initialBalance": 100000,
+          "currentBalance": 99000
+        },
+        {
+          "accountId": "FondoGeneral",
+          "currency": "USD",
+          "enabled": true,
+          "initialBalance": 10,
+          "currentBalance": 10
+        }
+      ],
+      "updatedAt": "2026-01-22T08:48:00.724Z"
+    }
+  }
+]

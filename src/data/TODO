@@ -1,3 +1,5 @@
 Todo: quitar que el cierre de ventas sea editable
 TODO: Contador de ediciones restastantes
 TODO: Hacer una alerta/notificacion que informe una actualizacion del sistema 
+TODO: CAMBIAR EL ARRAY DE PROVEEDORES A OBJETOS IGUAL QUE EL CAMBIO DE MOVIENTOS
+TODO: CAMBIAR MOVEMENTS A BCR,BN,BAC, FG

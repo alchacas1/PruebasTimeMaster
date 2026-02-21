@@ -1,6 +1,6 @@
 import { FirestoreService } from './firestore';
 import { FondoMovementTypeConfig } from '../types/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { collection, onSnapshot, query, orderBy, Unsubscribe } from 'firebase/firestore';
 
 // Keys para localStorage

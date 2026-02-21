@@ -9,9 +9,10 @@ import {
   deleteDoc,
   query,
   where, orderBy,
-  limit
+  limit,
+  getCountFromServer
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 
 export class FirestoreService {
   // Remove undefined values recursively from an object or array
@@ -39,9 +40,12 @@ export class FirestoreService {
   /**
  * Get all documents from a collection
  */
-  static async getAll(collectionName: string): Promise<any[]> {
+  static async getAll(collectionName: string, limitCount?: number): Promise<any[]> {
     try {
-      const querySnapshot = await getDocs(collection(db, collectionName));
+      const colRef = collection(db, collectionName);
+      const querySnapshot = typeof limitCount === 'number' && Number.isFinite(limitCount)
+        ? await getDocs(query(colRef, limit(Math.max(1, Math.trunc(limitCount)))))
+        : await getDocs(colRef);
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -189,8 +193,8 @@ export class FirestoreService {
    */
   static async count(collectionName: string): Promise<number> {
     try {
-      const snapshot = await getDocs(collection(db, collectionName));
-      return snapshot.size;
+      const snapshot = await getCountFromServer(collection(db, collectionName));
+      return snapshot.data().count;
     } catch (error) {
       console.error(`Error counting documents in ${collectionName}:`, error);
       throw error;

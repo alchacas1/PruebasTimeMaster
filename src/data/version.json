@@ -1,4 +1,41 @@
 {
-    "version": "1.2.76",
+    "version": "1.4.1",
+    "releaseNotes": [
+        {
+            "date": "2026-02-21",
+            "title": "Recetas: UI renovada con panel lateral",
+            "description": "Se agregó `RightDrawer` y se refactorizaron pantallas de recetas; además se ajustó la navegación para enrutar `recetas` hacia `agregarproducto` y se habilitó/actualizó la pestaña de recetas."
+        },
+        {
+            "date": "2026-02-20",
+            "title": "Recetas: editor, listado y paginación",
+            "description": "Se incorporaron componentes de recetas (editor, listado, paginación) y se refactorizó `RecetasTab` extrayendo secciones para una UI más mantenible."
+        },
+        {
+            "date": "2026-02-20",
+            "title": "Recetas: costos y precios visibles",
+            "description": "Ahora el listado de recetas muestra costos y precios de productos, mejorando la revisión rápida de márgenes y composición."
+        },
+        {
+            "date": "2026-02-20",
+            "title": "Productos: caché + control de versiones",
+            "description": "Se añadió un servicio de caché de productos e integración con el flujo de control de versiones para acelerar cargas y reducir lecturas repetidas."
+        },
+        {
+            "date": "2026-02-20",
+            "title": "Productos: soporte multi-empresa",
+            "description": "Se agregó selector de empresa, override para productos y soporte multi-compañía; también se normalizaron permisos asociados."
+        },
+        {
+            "date": "2026-02-21",
+            "title": "Permisos: nuevas capacidades",
+            "description": "Se añadieron permisos de `notificaciones` y ajustes relacionados (incluyendo cambios de permisos para deli) junto con actualizaciones de tabs/header para `agregarproducto`."
+        },
+        {
+            "date": "2026-02-19 → 2026-02-21",
+            "title": "Caja: confirmaciones y navegación por teclado",
+            "description": "Se agregó confirmación al guardar cuando el efectivo contado difiere y se mejoró la navegación por foco/teclado en inputs de efectivo para agilizar el arqueo."
+        }
+    ],  
     "_comment": "hacer una pagina de 'en mantenimiento' para secciones en desarrollo y a exepcion de un usuario admin"
 }

@@ -317,9 +317,13 @@ export class DailyClosingsService {
 
     static async saveClosing(company: string, record: DailyClosingRecord): Promise<void> {
         const docId = this.buildDocumentId(company);
-        if (!docId) return;
+        if (!docId) {
+            throw new Error('Company ID is required for saving closing');
+        }
         const sanitizedRecord = sanitizeRecord(record);
-        if (!sanitizedRecord) return;
+        if (!sanitizedRecord) {
+            throw new Error('Invalid closing record data');
+        }
         const existingDocument = await this.getDocument(company);
         const currentMap = existingDocument?.closingsByDate ?? {};
         const dateKey = buildDateKeyFromISO(sanitizedRecord.closingDate);
@@ -333,5 +337,18 @@ export class DailyClosingsService {
             closingsByDate: trimmed,
         };
         await FirestoreService.addWithId(COLLECTION_NAME, docId, payload);
+        
+        // Verify the save was successful by reading back the data
+        // Note: This works reliably because Firestore SDK serves reads from local cache
+        // immediately after writes, ensuring consistency for the same client
+        const verifyDoc = await this.getDocument(company);
+        if (!verifyDoc) {
+            throw new Error('Failed to verify closing save: document not found after save');
+        }
+        const verifyList = verifyDoc.closingsByDate[dateKey];
+        const savedRecord = verifyList?.find(item => item.id === sanitizedRecord.id);
+        if (!savedRecord) {
+            throw new Error(`Failed to verify closing save: record ${sanitizedRecord.id} not found after save`);
+        }
     }
 }

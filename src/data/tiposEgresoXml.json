@@ -1,0 +1,287 @@
+[
+  {
+    "codigo": "000",
+    "nombre": "COMPRAS DE CONTADO (MERCADERIA)",
+    "cuenta": "210502 000"
+  },
+  {
+    "codigo": "001",
+    "nombre": "PAPELERIA",
+    "cuenta": "610501 58"
+  },
+  {
+    "codigo": "002",
+    "nombre": "ARTICULOS BOTIQUIN",
+    "cuenta": "610501 13"
+  },
+  {
+    "codigo": "003",
+    "nombre": "ARTICULOS DE LIMPIEZA",
+    "cuenta": "610501 81"
+  },
+  {
+    "codigo": "004",
+    "nombre": "COSTO DE VENTAS",
+    "cuenta": "510501 01"
+  },
+  {
+    "codigo": "005",
+    "nombre": "MATERIAL DE EMPAQUE",
+    "cuenta": "610501 50"
+  },
+  {
+    "codigo": "006",
+    "nombre": "EQUIPO Y HERRAMIENTA MENOR",
+    "cuenta": "610501 73"
+  },
+  {
+    "codigo": "007",
+    "nombre": "COMBUSTIBLES Y LUBRICANTES",
+    "cuenta": "610501 70"
+  },
+  {
+    "codigo": "008",
+    "nombre": "MANTENIMIENTO DE EDIFICIO Y CONSTRUCCIONES",
+    "cuenta": "610501 18"
+  },
+  {
+    "codigo": "009",
+    "nombre": "MANTENIMIENTO DE MOBILIARIO Y EQUIPO",
+    "cuenta": "610501 19"
+  },
+  {
+    "codigo": "010",
+    "nombre": "SERVICIOS PROFESIONALES",
+    "cuenta": "610501 34"
+  },
+  {
+    "codigo": "011",
+    "nombre": "HONORARIOS",
+    "cuenta": "610501 61"
+  },
+  {
+    "codigo": "012",
+    "nombre": "MOBILIARIO Y EQUIPO",
+    "cuenta": "120504 01"
+  },
+  {
+    "codigo": "013",
+    "nombre": "EQUIPO DE COMPUTO",
+    "cuenta": "120504 01"
+  },
+  {
+    "codigo": "014",
+    "nombre": "GASTOS DE MATANZA",
+    "cuenta": "610501 52"
+  },
+  {
+    "codigo": "015",
+    "nombre": "UNIFORMES",
+    "cuenta": "610501 11"
+  },
+  {
+    "codigo": "016",
+    "nombre": "FLETES SOBRE VENTAS",
+    "cuenta": "610501 65"
+  },
+  {
+    "codigo": "017",
+    "nombre": "GASTOS VARIOS",
+    "cuenta": "610501 80"
+  },
+  {
+    "codigo": "018",
+    "nombre": "SERVICIOS DE CONSULTORIA VYH",
+    "cuenta": "610501 37"
+  },
+  {
+    "codigo": "019",
+    "nombre": "ALQUILER DE INMUEBLES",
+    "cuenta": "610501 63"
+  },
+  {
+    "codigo": "020",
+    "nombre": "PUBLICIDAD",
+    "cuenta": "610501 75"
+  },
+  {
+    "codigo": "021",
+    "nombre": "PAGO FACTURAS PROVEEDORES CAJA CHICA",
+    "cuenta": "411501 15"
+  },
+  {
+    "codigo": "022",
+    "nombre": "ETIQUETAS",
+    "cuenta": "610501 49"
+  },
+  {
+    "codigo": "023",
+    "nombre": "VIATICOS",
+    "cuenta": "610501 57"
+  },
+  {
+    "codigo": "024",
+    "nombre": "CUOTAS Y SUSCRIPCIONES",
+    "cuenta": "610501 76"
+  },
+  {
+    "codigo": "025",
+    "nombre": "MERCADERIA DAÑANA",
+    "cuenta": "610501 53"
+  },
+  {
+    "codigo": "026",
+    "nombre": "ELECTRICIDAD",
+    "cuenta": "610501 29"
+  },
+  {
+    "codigo": "027",
+    "nombre": "AGUA",
+    "cuenta": "610501 30"
+  },
+  {
+    "codigo": "028",
+    "nombre": "TELEFONOS",
+    "cuenta": "610501 31"
+  },
+  {
+    "codigo": "029",
+    "nombre": "GASTO POR TOMA FISICA DE INVENTARIO",
+    "cuenta": "610501 77"
+  },
+  {
+    "codigo": "030",
+    "nombre": "SALUD Y SEGURIDAD OCUPACIONAL",
+    "cuenta": "610501 12"
+  },
+  {
+    "codigo": "031",
+    "nombre": "FLETES SOBRE COMPRAS",
+    "cuenta": "610501 66"
+  },
+  {
+    "codigo": "032",
+    "nombre": "TRANSPORTE",
+    "cuenta": "610501 64"
+  },
+  {
+    "codigo": "033",
+    "nombre": "PATENTES MUNICIPALES",
+    "cuenta": "610501 39"
+  },
+  {
+    "codigo": "034",
+    "nombre": "ARTICULOS PARA CONFITERIA",
+    "cuenta": "610501 90"
+  },
+  {
+    "codigo": "035",
+    "nombre": "CONSTRUCCIONES EN PROCESO",
+    "cuenta": "120501 02"
+  },
+  {
+    "codigo": "036",
+    "nombre": "MONITOREO DE ALARMAS",
+    "cuenta": "610501 36"
+  },
+  {
+    "codigo": "037",
+    "nombre": "DONACIONES",
+    "cuenta": "610501 69"
+  },
+  {
+    "codigo": "038",
+    "nombre": "MANTENIMIENTO EQUIPO DE COMPUTO",
+    "cuenta": "610501 20"
+  },
+  {
+    "codigo": "039",
+    "nombre": "POLIZA DE RIESGOS DE TRABAJO",
+    "cuenta": "610501 44"
+  },
+  {
+    "codigo": "040",
+    "nombre": "PERMISOS DE FUNCIONAMIENTO",
+    "cuenta": "610501 85"
+  },
+  {
+    "codigo": "041",
+    "nombre": "DEPOSITOS DE GARANTIA",
+    "cuenta": "111503 04"
+  },
+  {
+    "codigo": "042",
+    "nombre": "IMPUESTO A LAS SOCIEDADES",
+    "cuenta": "611001 03"
+  },
+  {
+    "codigo": "043",
+    "nombre": "MANTENIMIENTO VEHICULO",
+    "cuenta": "610501 21"
+  },
+  {
+    "codigo": "044",
+    "nombre": "CUOTAS DE LA C.C.S.S.",
+    "cuenta": "210501 01"
+  },
+  {
+    "codigo": "045",
+    "nombre": "XPROCESO CONSTRUCCION CASAS (MATERIALES)",
+    "cuenta": "610501 51"
+  },
+  {
+    "codigo": "046",
+    "nombre": "BANCO LAFISE OPERACION #210098589 (P)",
+    "cuenta": "221001 10"
+  },
+  {
+    "codigo": "047",
+    "nombre": "BANCO LAFISE OPERACION #210098589 (I)",
+    "cuenta": "610502 10"
+  },
+  {
+    "codigo": "048",
+    "nombre": "MARCHAMOS",
+    "cuenta": "610501 71"
+  },
+  {
+    "codigo": "049",
+    "nombre": "IMPUESTO A LAS UTILIDADES",
+    "cuenta": "210501 03"
+  },
+  {
+    "codigo": "050",
+    "nombre": "POLIZA AUTOMOVIL",
+    "cuenta": "610501 45"
+  },
+  {
+    "codigo": "051",
+    "nombre": "COMPRA DE INVENTARIO",
+    "cuenta": "112501 01"
+  },
+  {
+    "codigo": "052",
+    "nombre": "LEASING BAC CREDOMATIC",
+    "cuenta": "610501 87"
+  },
+  {
+    "codigo": "053",
+    "nombre": "CUOTA CONDOMINAL",
+    "cuenta": "610501 96"
+  },
+  {
+    "codigo": "054",
+    "nombre": "LIQUIDACION DE FUNCIONARIO",
+    "cuenta": "610501 06"
+  },
+  {
+    "codigo": "055",
+    "nombre": "IMPUESTO AL VALOR AGREGADO (IVA)",
+    "cuenta": "210503 01"
+  },
+  {
+    "codigo": "056",
+    "nombre": "COMPRA DE VEHICULO (LEASING)",
+    "cuenta": "120505 01"
+  }
+]

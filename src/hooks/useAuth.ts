@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { User, UserPermissions } from '../types/firestore';
 import { TokenService } from '../services/tokenService';
 import { UsersService } from '../services/users';
+import { normalizeUserPermissions } from '../utils/permissions';
 
 interface SessionData {
   id?: string;
@@ -34,6 +35,10 @@ const MAX_INACTIVITY_MINUTES = {
   admin: 30,
   user: 480         // User: 8 horas
 };
+
+// Evita loops de recarga cuando expiró la sesión
+const SESSION_EXPIRED_RELOAD_KEY = 'pricemaster_session_expired_reload_at';
+const SESSION_EXPIRED_RELOAD_WINDOW_MS = 10_000;
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -94,12 +99,41 @@ export function useAuth() {
       localStorage.removeItem('pricemaster_session');
       localStorage.removeItem('pricemaster_session_id');
     }
-
     setUser(null);
     setIsAuthenticated(false);
     setSessionWarning(false);
     setUseTokenAuth(false);
-  }, [useTokenAuth]); const checkExistingSession = useCallback(() => {
+    setLoading(false);
+  }, [useTokenAuth]);
+
+  const logoutAndReloadOnce = useCallback((reason?: string) => {
+    // Limpia estado/almacenamiento primero
+    logout(reason);
+
+    // En cliente: recargar solo una vez por ventana de tiempo
+    if (typeof window === 'undefined') return;
+
+    try {
+      const now = Date.now();
+      const last = Number(sessionStorage.getItem(SESSION_EXPIRED_RELOAD_KEY) || '0');
+
+      // Si ya se recargó recientemente, evitar loop
+      if (last && now - last < SESSION_EXPIRED_RELOAD_WINDOW_MS) {
+        return;
+      }
+
+      sessionStorage.setItem(SESSION_EXPIRED_RELOAD_KEY, String(now));
+    } catch {
+      // Si sessionStorage falla, seguimos igual (preferible a quedar colgado)
+    }
+
+    // Dar un tick para que React aplique estado antes de recargar
+    setTimeout(() => {
+      window.location.reload();
+    }, 50);
+  }, [logout]);
+
+  const checkExistingSession = useCallback(() => {
     try {
       // Verificar primero si hay una sesión de token
       const tokenInfo = TokenService.getTokenInfo();
@@ -112,7 +146,7 @@ export function useAuth() {
           name: tokenInfo.user.name,
           ownercompanie: tokenInfo.user.ownercompanie,
           role: tokenInfo.user.role,
-          permissions: tokenInfo.user.permissions,
+          permissions: normalizeUserPermissions(tokenInfo.user.permissions, tokenInfo.user.role || 'user'),
           // Ensure ownerId and eliminate are available for actor-aware logic
           ownerId: tokenInfo.user.ownerId || '',
           eliminate: tokenInfo.user.eliminate ?? false
@@ -175,7 +209,7 @@ export function useAuth() {
             name: session.name,
             ownercompanie: (sessionObj.ownercompanie as string) || session.ownercompanie,
             role: session.role,
-            permissions: session.permissions, // ¡Importante! Incluir los permisos desde la sesión
+            permissions: normalizeUserPermissions(session.permissions, (session.role as any) || 'user'),
             // Restore ownerId and eliminate if present in the stored session
             ownerId: (sessionObj.ownerId as string) || '',
             eliminate: (sessionObj.eliminate as boolean) ?? false
@@ -208,16 +242,21 @@ export function useAuth() {
 
         } else {
           // Sesión expirada o inactiva
-          logout();
+            logoutAndReloadOnce('expired_or_inactive');
+        }
+      } else {
+        // No hay sesión persistida (ni token válido). Asegurar estado consistente.
+        if (user || isAuthenticated || useTokenAuth) {
+            logoutAndReloadOnce('missing_session');
         }
       }
     } catch (error) {
       console.error('Error checking session:', error);
-      logout();
+        logoutAndReloadOnce('check_error');
     } finally {
       setLoading(false);
     }
-  }, [checkInactivity, logout, user, isAuthenticated, sessionWarning]);
+    }, [checkInactivity, logoutAndReloadOnce, user, isAuthenticated, sessionWarning, useTokenAuth]);
   useEffect(() => {
     let unsubscribeUser: (() => void) | null = null;
 
@@ -229,11 +268,12 @@ export function useAuth() {
         user.id,
         (updatedUserData) => {
           if (updatedUserData) {
+            const normalizedPerms = normalizeUserPermissions(updatedUserData.permissions, updatedUserData.role || 'user');
             setUser((prevUser) => {
               if (!prevUser) return prevUser;
 
               // Actualizar solo si hay cambios relevantes (especialmente permisos)
-              const hasPermissionsChanged = JSON.stringify(prevUser.permissions) !== JSON.stringify(updatedUserData.permissions);
+              const hasPermissionsChanged = JSON.stringify(prevUser.permissions) !== JSON.stringify(normalizedPerms);
               const hasDataChanged = 
                 prevUser.name !== updatedUserData.name ||
                 prevUser.ownercompanie !== updatedUserData.ownercompanie ||
@@ -254,7 +294,7 @@ export function useAuth() {
                 if (sessionData) {
                   try {
                     const session = JSON.parse(sessionData);
-                    session.permissions = updatedUserData.permissions;
+                    session.permissions = normalizedPerms;
                     session.name = updatedUserData.name;
                     session.role = updatedUserData.role;
                     localStorage.setItem('pricemaster_session', JSON.stringify(session));
@@ -267,7 +307,7 @@ export function useAuth() {
               return {
                 ...prevUser,
                 ...updatedUserData,
-                permissions: updatedUserData.permissions
+                permissions: normalizedPerms
               };
             });
           }
@@ -307,12 +347,14 @@ export function useAuth() {
     };
   }, [checkExistingSession, updateActivity, isAuthenticated, user?.id, useTokenAuth]);
   const login = (userData: User, keepActive: boolean = false, useTokens: boolean = false) => {
+    const normalizedPerms = normalizeUserPermissions(userData.permissions, userData.role || 'user');
     if (useTokens) {
       // Usar autenticación por tokens (una semana automáticamente)
       TokenService.createTokenSession(userData);
       const userObj = userData as unknown as Record<string, unknown>;
       const enrichedUser = {
         ...userData,
+        permissions: normalizedPerms,
         ownerId: (userObj.ownerId as string) || '',
         eliminate: (userObj.eliminate as boolean) ?? false
       };
@@ -331,7 +373,7 @@ export function useAuth() {
         name: userData.name,
         ownercompanie: (userData as unknown as Record<string, unknown>).ownercompanie as string | undefined,
         role: userData.role,
-        permissions: userData.permissions, // ¡Importante! Incluir los permisos
+        permissions: normalizedPerms,
         loginTime: new Date().toISOString(),
         lastActivity: new Date().toISOString(),
         sessionId,
@@ -351,6 +393,7 @@ export function useAuth() {
       const userObj2 = userData as unknown as Record<string, unknown>;
       const enrichedUser = {
         ...userData,
+        permissions: normalizedPerms,
         ownerId: (userObj2.ownerId as string) || '',
         eliminate: (userObj2.eliminate as boolean) ?? false
       };

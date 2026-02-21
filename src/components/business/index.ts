@@ -6,3 +6,5 @@ export { default as PayrollExporter } from './PayrollExporter';
 export { default as PayrollRecordsViewer } from './PayrollRecordsViewer';
 export { default as ScheduleReportTab } from './ScheduleReportTab';
 export { default as EmployeeSummaryCalculator } from './EmployeeSummaryCalculator';
+export { default as CalculoHorasPrecios } from './CalculoHorasPrecios';
+export { default as EmpleadosProximamente } from './EmpleadosProximamente';

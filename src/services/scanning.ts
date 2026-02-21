@@ -12,7 +12,7 @@ import {
     getDoc
 } from 'firebase/firestore';
 import { ref, listAll, deleteObject, getDownloadURL, getMetadata } from 'firebase/storage';
-import { db, storage } from '../config/firebase';
+import { db, storage } from '@/config/firebase';
 import type { ScanResult } from '../types/firestore';
 
 export type { ScanResult } from '../types/firestore';
@@ -73,6 +73,21 @@ class ScanningCache {
 
 export class ScanningService {
     private static readonly COLLECTION_NAME = 'scans';
+
+    /**
+     * Get how many images exist for a code (uses cached filename list)
+     */
+    static async getImageCountForCode(code: string): Promise<number> {
+        const trimmed = code?.trim();
+        if (!trimmed) return 0;
+
+        try {
+            const filenames = await this.getAllImageFilenames();
+            return filenames.filter((name) => name.startsWith(trimmed)).length;
+        } catch {
+            return 0;
+        }
+    }
 
     /**
      * Add a new scan result (optimized)
@@ -139,7 +154,8 @@ export class ScanningService {
             let q = query(
                 collection(db, this.COLLECTION_NAME),
                 where('processed', '==', false),
-                orderBy('timestamp', 'desc')
+                orderBy('timestamp', 'desc'),
+                limit(50)
             );
 
             if (sessionId) {
@@ -147,7 +163,8 @@ export class ScanningService {
                     collection(db, this.COLLECTION_NAME),
                     where('processed', '==', false),
                     where('sessionId', '==', sessionId),
-                    orderBy('timestamp', 'desc')
+                    orderBy('timestamp', 'desc'),
+                    limit(50)
                 );
             }
 

@@ -5,9 +5,9 @@
  * Solo lee y compara, no hace modificaciones
  */
 
-const admin = require('firebase-admin');
-const fs = require('fs');
-const path = require('path');
+let admin;
+let fs;
+let path;
 
 // Colores para la consola
 const colors = {
@@ -38,6 +38,15 @@ function compareVersions(v1, v2) {
 
 async function checkVersion() {
   try {
+    const adminModule = await import('firebase-admin');
+    admin = adminModule.default ?? adminModule;
+
+    const fsModule = await import('node:fs');
+    fs = fsModule.default ?? fsModule;
+
+    const pathModule = await import('node:path');
+    path = pathModule.default ?? pathModule;
+
     console.log(`\n${colors.bold}${colors.cyan}📊 ESTADO DE VERSIONES${colors.reset}\n`);
     console.log('═'.repeat(50) + '\n');
 
@@ -57,7 +66,7 @@ async function checkVersion() {
       process.exit(1);
     }
 
-    const serviceAccount = require(serviceAccountPath);
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
     if (!admin.apps.length) {
       admin.initializeApp({
@@ -66,6 +75,7 @@ async function checkVersion() {
     }
 
     const db = admin.firestore();
+    db.settings({ databaseId: 'restauracion' });
 
     // Obtener versión de Firestore
     const versionRef = db.collection('version').doc('current');

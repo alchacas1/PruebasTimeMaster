@@ -1,0 +1,32 @@
+[
+  {
+    "id": "nombreProducto",
+    "nombre": "nombreProducto",
+    "descripcion": "productico",
+    "pesoengramos": 2000,
+    "precio": 1000,
+    "precioxgramo": 0.5,
+    "createdAt": "2026-02-18T01:05:38.688Z",
+    "updateAt": "2026-02-20T01:05:55.862Z"
+  },
+  {
+    "id": "nombreProducto2",
+    "nombre": "nombreProducto2",
+    "descripcion": "productico2",
+    "pesoengramos": 2000,
+    "precio": 1000,
+    "precioxgramo": 0.5,
+    "createdAt": "2026-02-18T01:05:38.688Z",
+    "updateAt": "2026-02-20T01:05:55.862Z"
+  },
+  {
+    "id": "nombreProducto3",
+    "nombre": "nombreProducto3",
+    "descripcion": "productico3",
+    "pesoengramos": 2000,
+    "precio": 1000,
+    "precioxgramo": 0.5,
+    "createdAt": "2026-02-18T01:05:38.688Z",
+    "updateAt": "2026-02-20T01:05:55.862Z"
+  }
+]

@@ -84,7 +84,7 @@ ${notesSection}`.trim();
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1b1f23;">
             <h2 style="margin-bottom: 12px;">Nuevo cierre diario registrado</h2>
-            <p style="margin: 0 0 12px 0;">Se registró un cierre para <strong>${context.company}</strong> en la cuenta <strong>${context.accountKey}</strong>.</p>
+            <p style="margin: 0 0 12px 0;">Se registró un cierre para <strong>${context.company}</strong> en la cuenta <strong>Fondo General</strong>.</p>
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
                 <tbody>
                     <tr>

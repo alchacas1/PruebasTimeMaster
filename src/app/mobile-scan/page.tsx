@@ -8,7 +8,7 @@ import { ScanningService } from '../../services/scanning';
 import { useAuth } from '../../hooks/useAuth';
 import { useBarcodeScanner } from '../../hooks/useBarcodeScanner';
 import { CameraScanner } from '../../components/scanner';
-import { storage } from '../../config/firebase';
+import { storage } from '@/config/firebase';
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
 
 // Force dynamic rendering for this page

@@ -5,9 +5,9 @@
  * Prioridad: version.json superior actualiza Firestore, si son iguales usa Firestore
  */
 
-const admin = require('firebase-admin');
-const fs = require('fs');
-const path = require('path');
+let admin;
+let fs;
+let path;
 
 // Colores para la consola
 const colors = {
@@ -36,6 +36,15 @@ function compareVersions(v1, v2) {
 
 async function syncVersion() {
   try {
+    const adminModule = await import('firebase-admin');
+    admin = adminModule.default ?? adminModule;
+
+    const fsModule = await import('node:fs');
+    fs = fsModule.default ?? fsModule;
+
+    const pathModule = await import('node:path');
+    path = pathModule.default ?? pathModule;
+
     console.log(`${colors.blue}🔄 Iniciando sincronización de versión...${colors.reset}\n`);
 
     // Leer version.json
@@ -54,7 +63,7 @@ async function syncVersion() {
       process.exit(1);
     }
 
-    const serviceAccount = require(serviceAccountPath);
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
     if (!admin.apps.length) {
       admin.initializeApp({
@@ -63,6 +72,7 @@ async function syncVersion() {
     }
 
     const db = admin.firestore();
+    db.settings({ databaseId: 'restauracion' });
 
     // Verificar versión actual en Firestore
     const versionRef = db.collection('version').doc('current');

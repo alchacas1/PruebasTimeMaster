@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, query, where, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { RecoveryToken } from '../types/recovery';
 import crypto from 'crypto';
 

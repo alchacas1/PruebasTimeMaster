@@ -1,15 +1,32 @@
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onRequest } from 'firebase-functions/v2/https';
+import { defineSecret } from 'firebase-functions/params';
+import * as admin from 'firebase-admin';
+import nodemailer from 'nodemailer';
+
+// Definir secretos
+const gmailUser = defineSecret("GMAIL_USER");
+const gmailAppPassword = defineSecret("GMAIL_APP_PASSWORD");
 
 // Inicializar Firebase Admin
 admin.initializeApp();
 
+// Obtener referencia a la base de datos 'restauracion'
+const getDb = () => admin.firestore().databaseId === 'restauracion' 
+  ? admin.firestore() 
+  : admin.app().firestore('restauracion');
+
 /**
- * Cloud Function que se dispara cuando se crea un documento en la colección 'emails'
+ * Cloud Function que se dispara cuando se crea un documento en la colección 'mail'
  * Procesa y envía el email usando nodemailer
  */
-exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) => {
+export const sendEmailTrigger = onDocumentCreated(
+  {
+    document: "mail/{emailId}",
+    database: "restauracion",
+    secrets: [gmailUser, gmailAppPassword],
+  },
+  async (event) => {
   const emailData = event.data.data();
   const emailId = event.params.emailId;
 
@@ -28,8 +45,8 @@ exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) =
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
+        user: gmailUser.value(),
+        pass: gmailAppPassword.value(),
       },
       pool: true,
       maxConnections: 1,
@@ -41,7 +58,7 @@ exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) =
     const mailOptions = {
       from: {
         name: "Time Master System",
-        address: process.env.GMAIL_USER || "",
+        address: gmailUser.value() || "",
       },
       to: emailData.to,
       subject: emailData.subject,
@@ -68,7 +85,7 @@ exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) =
         "X-MSMail-Priority": "Normal",
         "Importance": "Normal",
         "X-Mailer": "Time Master System",
-        "Reply-To": process.env.GMAIL_USER || "",
+        "Reply-To": gmailUser.value() || "",
       },
       messageId: `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@pricemaster.local>`,
       date: new Date(),
@@ -80,7 +97,7 @@ exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) =
     console.log("✅ Email sent successfully:", info.messageId);
 
     // Actualizar documento en Firestore con el estado
-    await admin.firestore().collection("emails").doc(emailId).update({
+    await getDb().collection("mail").doc(emailId).update({
       status: "sent",
       sentAt: admin.firestore.FieldValue.serverTimestamp(),
       messageId: info.messageId,
@@ -91,7 +108,7 @@ exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) =
     console.error("❌ Error sending email:", error);
 
     // Actualizar documento con el error
-    await admin.firestore().collection("emails").doc(emailId).update({
+    await getDb().collection("mail").doc(emailId).update({
       status: "failed",
       error: error.message,
       failedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -107,16 +124,58 @@ exports.sendEmailTrigger = onDocumentCreated("emails/{emailId}", async (event) =
  * Función auxiliar para verificar la configuración del sistema de emails
  * Puede ser llamada manualmente para diagnóstico
  */
-exports.checkEmailConfig = require("firebase-functions/v2/https").onRequest(
+export const checkEmailConfig = onRequest(
+  { secrets: [gmailUser, gmailAppPassword] },
   async (req, res) => {
-    const hasGmailUser = !!process.env.GMAIL_USER;
-    const hasGmailPassword = !!process.env.GMAIL_APP_PASSWORD;
+    const hasGmailUser = !!gmailUser.value();
+    const hasGmailPassword = !!gmailAppPassword.value();
 
     res.json({
       configured: hasGmailUser && hasGmailPassword,
-      gmailUser: hasGmailUser ? process.env.GMAIL_USER : "NOT_SET",
+      gmailUser: hasGmailUser ? gmailUser.value() : "NOT_SET",
       gmailPassword: hasGmailPassword ? "SET" : "NOT_SET",
       timestamp: new Date().toISOString(),
     });
+  }
+);
+
+/**
+ * Función de prueba para enviar un email de prueba
+ * Uso: POST /testEmail con body { "to": "email@example.com" }
+ */
+export const testEmail = onRequest(
+  { secrets: [gmailUser, gmailAppPassword] },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
+
+    const { to } = req.body;
+    if (!to) {
+      return res.status(400).json({ error: "Missing 'to' email address in request body" });
+    }
+
+    try {
+      // Crear documento de email de prueba en Firestore
+      const emailData = {
+        to: to,
+        subject: "🧪 Email de Prueba - Time Master",
+        text: "Este es un email de prueba para verificar que el sistema de correos funciona correctamente.",
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        status: "pending",
+      };
+
+      const docRef = await getDb().collection("mail").add(emailData);
+
+      res.json({
+        success: true,
+        message: "Email de prueba encolado",
+        emailId: docRef.id,
+        note: "El trigger sendEmailTrigger debería procesarlo automáticamente",
+      });
+    } catch (error) {
+      console.error("Error creating test email:", error);
+      res.status(500).json({ error: error.message });
+    }
   }
 );

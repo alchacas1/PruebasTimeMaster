@@ -57,7 +57,7 @@ export default function FondoPage() {
     useEffect(() => {
         // No ejecutar mientras se cargan los permisos
         if (loading) return;
-        
+
         if (availableTabs.length === 0) {
             setActiveState('');
             return;
@@ -129,11 +129,19 @@ export default function FondoPage() {
                                             aria-selected={isActive}
                                             onClick={() => setActive(tab.id)}
                                             className={`relative flex-shrink-0 rounded-md px-3 py-2 sm:px-4 text-sm font-semibold whitespace-nowrap transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--card-bg)] ${isActive
-                                                ? 'border-[var(--accent)] text-[var(--foreground)] bg-[var(--accent)]/15 shadow-md after:absolute after:bottom-[-3px] sm:after:bottom-[-4px] after:left-1 sm:after:left-2 after:right-1 sm:after:right-2 after:h-0.5 sm:after:h-1 after:rounded-full after:bg-[var(--accent)] after:content-[""]'
+                                                ? 'border-[var(--accent)] text-[var(--foreground)] bg-[var(--accent)]/15 shadow-md'
                                                 : 'border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/10'
                                                 }`}
                                         >
-                                            {tab.label}
+                                            <span className="flex items-center gap-1.5">
+                                                {isActive && (
+                                                    <div className="w-2 h-2 bg-[var(--accent)] rounded-full" />
+                                                )}
+                                                {tab.label}
+                                            </span>
+                                            {isActive && (
+                                                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--accent)] rounded-full" />
+                                            )}
                                         </button>
                                     );
                                 })}

@@ -6,11 +6,11 @@ import dynamic from 'next/dynamic'
 import { useAuth } from '@/hooks/useAuth'
 import useToast from '@/hooks/useToast';
 /*import { Calculator, Smartphone, Type, Banknote, Scan, Clock, Truck, Settings, History, } from lucide-react'*/
-import type { ScanHistoryEntry } from '@/types/barcode'
-import { ClientOnlyHomeMenu } from '@/components/layout'
-import { storage } from '@/config/firebase'
-import { ref, listAll } from 'firebase/storage'
-import Pruebas from '@/components/xpruebas/Pruebas'
+import type { ScanHistoryEntry } from '@/types/barcode';
+import { ClientOnlyHomeMenu } from '@/components/layout';
+import { ref, listAll } from 'firebase/storage';
+import Pruebas from '@/components/xpruebas/Pruebas';
+import { storage } from '@/config/firebase';
 
 // Dynamic imports for code splitting
 const BarcodeScanner = dynamic(() => import('@/components/scanner').then(mod => ({ default: mod.BarcodeScanner })), { ssr: false })
@@ -20,6 +20,8 @@ const ScanHistory = dynamic(() => import('@/components/scanner').then(mod => ({ 
 const CashCounterTabs = dynamic(() => import('@/components/business').then(mod => ({ default: mod.CashCounterTabs })), { ssr: false })
 const ControlHorario = dynamic(() => import('@/components/business').then(mod => ({ default: mod.ControlHorario })), { ssr: false })
 const TimingControl = dynamic(() => import('@/components/business').then(mod => ({ default: mod.TimingControl })), { ssr: false })
+const CalculoHorasPrecios = dynamic(() => import('@/components/business').then(mod => ({ default: mod.CalculoHorasPrecios })), { ssr: false })
+const EmpleadosProximamente = dynamic(() => import('@/components/business').then(mod => ({ default: mod.EmpleadosProximamente })), { ssr: false })
 const SupplierOrders = dynamic(() => import('@/components/business').then(mod => ({ default: mod.SupplierOrders })), { ssr: false })
 const Mantenimiento = dynamic(() => import('@/components/admin').then(mod => ({ default: mod.Mantenimiento })), { ssr: false })
 const ScanHistoryTable = dynamic(() => import('@/components/scanner').then(mod => ({ default: mod.ScanHistoryTable })), { ssr: false })
@@ -28,9 +30,13 @@ const AgregarProveedorPage = dynamic(() => import('@/app/fondogeneral/agregarpro
 const ReportesPage = dynamic(() => import('@/app/fondogeneral/otra/page'), { ssr: false })
 const ConfiguracionFondoGeneralPage = dynamic(() => import('@/app/fondogeneral/configuracion/page'), { ssr: false })
 const SolicitudForm = dynamic(() => import('@/components/solicitud/SolicitudForm'), { ssr: false })
+const XmlPage = dynamic(() => import('@/components/xml/XmlPage'), { ssr: false })
+const RecetasTab = dynamic(() => import('../components/recetas/RecetasTab').then(mod => ({ default: mod.RecetasTab })), { ssr: false })
+const AgregarProductoTab = dynamic(() => import('../components/recetas/AgregarProductoTab').then(mod => ({ default: mod.AgregarProductoTab })), { ssr: false })
 
 // 1) Ampliamos ActiveTab para incluir "cashcounter", "controlhorario", "supplierorders", "edit", "scanhistory", "solicitud", "agregarproveedor", "reportes"
-type ActiveTab = 'scanner' | 'calculator' | 'converter' | 'cashcounter' | 'timingcontrol' | 'controlhorario' | 'supplierorders' | 'scanhistory' | 'edit' | 'solicitud' | 'fondogeneral' | 'agregarproveedor' | 'reportes' | 'configuracion' | 'pruebas'
+type ActiveTab = 'scanner' | 'calculator' | 'converter' | 'xml' | 'cashcounter' | 'recetas' | 'agregarproducto' | 'timingcontrol' | 'controlhorario' | 'empleados' | 'calculohorasprecios' | 'supplierorders' | 'scanhistory' | 'edit' | 'solicitud' | 'fondogeneral' | 'agregarproveedor' | 'reportes' | 'configuracion' | 'pruebas'
+
 
 export default function HomePage() {
   // Hook para obtener el usuario autenticado
@@ -218,7 +224,7 @@ export default function HomePage() {
       if (typeof window !== 'undefined') {
         const hash = window.location.hash.replace('#', '') as ActiveTab;
         const validTabs = [
-          'scanner', 'calculator', 'converter', 'cashcounter', 'timingcontrol', 'controlhorario', 'supplierorders', 'scanhistory', 'solicitud', 'fondogeneral', 'agregarproveedor', 'reportes', 'configuracion',
+          'scanner', 'calculator', 'converter', 'xml', 'cashcounter', 'recetas', 'agregarproducto', 'timingcontrol', 'controlhorario', 'empleados', 'calculohorasprecios', 'supplierorders', 'scanhistory', 'solicitud', 'fondogeneral', 'agregarproveedor', 'reportes', 'configuracion',
           ...(isSuperAdmin ? ['pruebas'] : [])
         ];
         if (validTabs.includes(hash)) {
@@ -242,7 +248,7 @@ export default function HomePage() {
       const handleHashChange = () => {
         const hash = window.location.hash.replace('#', '') as ActiveTab;
         const validTabs = [
-          'scanner', 'calculator', 'converter', 'cashcounter', 'timingcontrol', 'controlhorario', 'supplierorders', 'scanhistory', 'edit', 'solicitud', 'fondogeneral', 'agregarproveedor', 'reportes', 'configuracion',
+          'scanner', 'calculator', 'converter', 'xml', 'cashcounter', 'recetas', 'agregarproducto', 'timingcontrol', 'controlhorario', 'empleados', 'calculohorasprecios', 'supplierorders', 'scanhistory', 'edit', 'solicitud', 'fondogeneral', 'agregarproveedor', 'reportes', 'configuracion',
           ...(isSuperAdmin ? ['pruebas'] : [])
         ];
         if (validTabs.includes(hash)) {
@@ -315,9 +321,21 @@ export default function HomePage() {
                 <TextConversion />
               )}
 
+              {/* XML */}
+              {activeTab === 'xml' && (
+                <XmlPage />
+              )}
+
               {/* CASHCOUNTER (Contador Efectivo) */}
               {activeTab === 'cashcounter' && (
                 <CashCounterTabs />
+              )}
+
+              {activeTab === 'recetas' && (
+                <RecetasTab />
+              )}
+              {activeTab === 'agregarproducto' && (
+                <AgregarProductoTab />
               )}
 
               {/* CONTROL TIEMPOS */}
@@ -330,6 +348,16 @@ export default function HomePage() {
               {/* CONTROL HORARIO */}
               {activeTab === 'controlhorario' && (
                 <ControlHorario currentUser={user} />
+              )}
+
+              {/* EMPLEADOS (próximamente) */}
+              {activeTab === 'empleados' && (
+                <EmpleadosProximamente />
+              )}
+
+              {/* CALCULO HORAS PRECIOS */}
+              {activeTab === 'calculohorasprecios' && (
+                <CalculoHorasPrecios />
               )}
 
               {/* SUPPLIER ORDERS */}

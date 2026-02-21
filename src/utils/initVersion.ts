@@ -1,4 +1,4 @@
-import { db } from '../config/firebase';
+import { db } from '@/config/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import versionData from '../data/version.json';
 
