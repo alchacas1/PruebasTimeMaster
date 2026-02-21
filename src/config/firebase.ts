@@ -41,7 +41,7 @@ const app = initializeApp(firebaseConfig);
 // To make production robust, default to "restauracion" when NODE_ENV === 'production'.
 const firestoreDatabaseIdRaw = (process.env.NEXT_PUBLIC_FIRESTORE_DATABASE_ID || '').trim();
 const firestoreDatabaseId =
-  firestoreDatabaseIdRaw || (process.env.NODE_ENV === 'production' ? 'production' : '');
+  firestoreDatabaseIdRaw || (process.env.NODE_ENV === 'production' ? 'restauracion' : '');
 
 export const db = (() => {
   const isBrowser = typeof window !== 'undefined';
