@@ -34,14 +34,19 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firestore
 // - In browser: enable persistent cache so offline writes survive reloads (common cause of "I saved it and tomorrow it's gone").
 // - In SSR / environments without IndexedDB: fallback to default (in-memory).
-// Optional override: set NEXT_PUBLIC_FIRESTORE_DATABASE_ID to target a named Firestore database.
-// In dev/tests we keep it empty in `.env.local` to use the default Firestore database.
-// IMPORTANT: Next loads `.env.local` with higher priority than `.env`. If `.env.local` defines
-// NEXT_PUBLIC_FIRESTORE_DATABASE_ID as an empty string, it will override the production value.
+// Optional override (production only): set NEXT_PUBLIC_FIRESTORE_DATABASE_ID to target a named Firestore database.
+// In development we ALWAYS use the default Firestore database (no databaseId), even if the env var is set.
+// This prevents local `.env.local` overrides from accidentally pointing dev to a non-default database.
 // To make production robust, default to "restauracion" when NODE_ENV === 'production'.
 const firestoreDatabaseIdRaw = (process.env.NEXT_PUBLIC_FIRESTORE_DATABASE_ID || '').trim();
-const firestoreDatabaseId =
-  firestoreDatabaseIdRaw || (process.env.NODE_ENV === 'production' ? 'restauracion' : '');
+const isProduction = process.env.NODE_ENV === 'production';
+const firestoreDatabaseId = isProduction ? (firestoreDatabaseIdRaw || 'restauracion') : '';
+
+if (!isProduction && firestoreDatabaseIdRaw) {
+  console.warn(
+    '⚠️ NEXT_PUBLIC_FIRESTORE_DATABASE_ID is set but will be ignored in development. Using the default Firestore database.'
+  );
+}
 
 export const db = (() => {
   const isBrowser = typeof window !== 'undefined';
